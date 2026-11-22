@@ -665,6 +665,7 @@ function mockResult(id, schema) {
   return {
     template_id: id, header, tables,
     meta: {
+      header_index: Math.max(0, Math.min(Math.floor(Number(schema.header_index)) || 0, (schema.tables || []).length)),
       header: (schema.header || []).map((f) => ({ key: f.key, label: f.label, type: f.type })),
       tables: (schema.tables || []).map((t) => ({ key: t.key, label: t.label, columns: t.columns.map((c) => ({ key: c.key, label: c.label, type: c.type })) })),
     },
@@ -716,7 +717,19 @@ function normalizeSchema(src) {
     return { key: sanitizeKey(t.key, tUsed, 'table'), label: String(t.label || t.key || '표').slice(0, 60),
       columns: (Array.isArray(t.columns) ? t.columns : []).map((c) => fix(c, used, 'col')) };
   });
+  out.header_index = Math.max(0, Math.min(Math.floor(Number(src.header_index)) || 0, out.tables.length));
   return out;
+}
+// 상단 항목과 표들의 배치: 상단 항목이 표 몇 개 뒤에 오는지를 header_index로 저장합니다.
+function layoutOf(s) {
+  const hi = Math.max(0, Math.min(Math.floor(Number(s.header_index)) || 0, s.tables.length));
+  const L = s.tables.slice(); L.splice(hi, 0, 'H'); return L;
+}
+function applyLayout(s, L) { s.header_index = L.indexOf('H'); s.tables = L.filter((x) => x !== 'H'); }
+function moveBlock(item, dir) {
+  const s = draft.schema, L = layoutOf(s), i = L.indexOf(item), j = i + dir;
+  if (i < 0 || j < 0 || j >= L.length) return;
+  [L[i], L[j]] = [L[j], L[i]]; applyLayout(s, L); renderEditor();
 }
 
 function moveButtons(list, idx, onChange) {
@@ -741,24 +754,23 @@ function fitKey(used, key) {
   while (used.has(k)) { k = key.slice(0, 36) + '_' + i; i += 1; }
   used.add(k); return k;
 }
-// 선택한 항목을 새 표로 분리. source: 'header' 또는 표 번호
+// 선택한 항목을 새 표로 분리. source: 'header' 또는 표 번호(draft.schema.tables 안의 순서)
 function splitToTable(source) {
   const s = draft.schema;
-  const list = source === 'header' ? s.header : s.tables[source].columns;
+  const srcTable = source === 'header' ? null : s.tables[source];
+  const list = srcTable ? srcTable.columns : s.header;
   const items = list.filter((f) => picked.has(f));
   if (!items.length) return;
   const used = new Set();
   const cols = items.map((f) => { picked.delete(f); return Object.assign({}, f, { key: fitKey(used, f.key) }); });
   for (const f of items) list.splice(list.indexOf(f), 1);
-  const base = source === 'header' ? '새 표 (상단에서 분리)' : '새 표 (' + s.tables[source].label + '에서 분리)';
-  const tKey = uniqueKey(s.tables, 'table');
-  const at = source === 'header' ? 0 : source + 1;
+  const label = srcTable ? '새 표 (' + srcTable.label + '에서 분리)' : '새 표 (상단에서 분리)';
+  const nt = { key: uniqueKey(s.tables, 'table'), label: label.slice(0, 60), columns: cols };
+  const L = layoutOf(s);
+  L.splice(L.indexOf(srcTable || 'H') + 1, 0, nt);
   let removed = '';
-  s.tables.splice(at, 0, { key: tKey, label: base.slice(0, 60), columns: cols });
-  if (source !== 'header') {
-    const src = s.tables[source];
-    if (!src.columns.length) { s.tables.splice(source, 1); removed = ' 원래 표는 열이 없어져 삭제했습니다.'; }
-  }
+  if (srcTable && !srcTable.columns.length) { L.splice(L.indexOf(srcTable), 1); removed = ' 원래 표는 열이 없어져 삭제했습니다.'; }
+  applyLayout(s, L);
   editorNote = items.length + '개 항목을 새 표로 분리했습니다. 표 이름과 열 이름을 확인해 주세요.' + removed;
   renderEditor();
 }
@@ -772,7 +784,7 @@ function moveToHeader(ti) {
   items.forEach((f) => { picked.delete(f); s.header.push(Object.assign({}, f, { key: fitKey(used, f.key) })); });
   t.columns = t.columns.filter((f) => !items.includes(f));
   let removed = '';
-  if (!t.columns.length) { s.tables.splice(ti, 1); removed = ' 원래 표는 열이 없어져 삭제했습니다.'; }
+  if (!t.columns.length) { const L = layoutOf(s); L.splice(L.indexOf(t), 1); applyLayout(s, L); removed = ' 원래 표는 열이 없어져 삭제했습니다.'; }
   editorNote = items.length + '개 항목을 상단 항목으로 옮겼습니다.' + removed;
   renderEditor();
 }
@@ -806,21 +818,36 @@ function fieldTable(list, onChange, emptyText) {
     : [el('tr', {}, el('td', { colspan: 7 }, el('span', { class: 'hint' }, emptyText)))];
   return el('div', { class: 'scroll' }, el('table', {}, thead, el('tbody', {}, body)));
 }
+function blockMoveButtons(item, L) {
+  const i = L.indexOf(item);
+  return [
+    el('button', { class: 'btn small ghost', type: 'button', 'aria-label': '위로', title: '한 칸 위로 옮깁니다', disabled: i === 0, onclick: () => moveBlock(item, -1) }, '↑ 위로'),
+    el('button', { class: 'btn small ghost', type: 'button', 'aria-label': '아래로', title: '한 칸 아래로 옮깁니다', disabled: i === L.length - 1, onclick: () => moveBlock(item, 1) }, '↓ 아래로'),
+  ];
+}
 function renderEditor() {
   const s = draft.schema;
   const body = $('#editorBody');
   body.replaceChildren();
   const again = () => renderEditor();
+  const L = layoutOf(s);
 
   if (editorNote) { body.append(el('div', { class: 'status show okk', style: 'margin:0 0 8px' }, editorNote)); editorNote = ''; }
-  body.append(el('p', { class: 'hint', style: 'margin:0 0 4px' }, '표로 따로 만들고 싶은 항목은 왼쪽 "선택"에 체크한 뒤 각 영역 아래의 "선택 항목을 새 표로 분리"를 누르세요.'));
-  body.append(
-    el('div', { class: 'section-head' }, el('h3', {}, '문서 상단 항목 (한 번만 적는 칸: 날짜, 작성자 등)'),
-      el('button', { class: 'btn small ghost', type: 'button', onclick: () => { s.header.push({ key: uniqueKey(s.header, 'field'), label: '새 항목', type: 'string', required: false }); again(); } }, '+ 항목 추가')),
-    fieldTable(s.header, again, '상단 항목이 없습니다.'),
-    el('div', { style: 'margin-top:8px' }, pickButton('header', '선택 항목을 새 표로 분리')),
-  );
-  s.tables.forEach((t, ti) => {
+  body.append(el('p', { class: 'hint', style: 'margin:0 0 4px' }, '표로 따로 만들고 싶은 항목은 왼쪽 "선택"에 체크한 뒤 각 영역 아래의 "선택 항목을 새 표로 분리"를 누르세요. 상단 항목과 표의 순서는 각 제목 줄의 ↑ ↓로 바꿉니다.'));
+
+  L.forEach((item) => {
+    if (item === 'H') {
+      body.append(
+        el('div', { class: 'section-head' }, el('h3', {}, '문서 상단 항목 (한 번만 적는 칸: 날짜, 작성자 등)'),
+          el('div', { class: 'row', style: 'gap:8px' },
+            el('button', { class: 'btn small ghost', type: 'button', onclick: () => { s.header.push({ key: uniqueKey(s.header, 'field'), label: '새 항목', type: 'string', required: false }); again(); } }, '+ 항목 추가'),
+            ...blockMoveButtons('H', L))),
+        fieldTable(s.header, again, '상단 항목이 없습니다.'),
+        el('div', { style: 'margin-top:8px' }, pickButton('header', '선택 항목을 새 표로 분리')),
+      );
+      return;
+    }
+    const t = item, ti = s.tables.indexOf(t);
     body.append(
       el('div', { class: 'section-head' },
         el('div', { class: 'row', style: 'gap:8px;flex:1' },
@@ -829,8 +856,8 @@ function renderEditor() {
             onchange: (e) => { t.label = e.target.value.trim() || t.key; } })),
         el('div', { class: 'row', style: 'gap:8px' },
           el('button', { class: 'btn small ghost', type: 'button', onclick: () => { t.columns.push({ key: uniqueKey(t.columns, 'col'), label: '새 항목', type: 'string', required: false }); again(); } }, '+ 열 추가'),
-          moveButtons(s.tables, ti, again),
-          el('button', { class: 'btn small danger', type: 'button', onclick: () => { s.tables.splice(ti, 1); again(); } }, '표 삭제'))),
+          ...blockMoveButtons(t, L),
+          el('button', { class: 'btn small danger', type: 'button', onclick: () => { const L2 = layoutOf(s); L2.splice(L2.indexOf(t), 1); applyLayout(s, L2); again(); } }, '표 삭제'))),
       fieldTable(t.columns, again, '열이 없습니다. 열을 추가해 주세요.'),
       el('div', { class: 'row', style: 'gap:8px;margin-top:8px' },
         pickButton(ti, '선택 항목을 새 표로 분리'),
@@ -838,7 +865,7 @@ function renderEditor() {
     );
   });
   body.append(el('div', { style: 'margin-top:14px' },
-    el('button', { class: 'btn small ghost', type: 'button', onclick: () => { s.tables.push({ key: uniqueKey(s.tables, 'table'), label: '새 표', columns: [{ key: 'col_1', label: '새 항목', type: 'string', required: false }] }); again(); } }, '+ 표 추가')));
+    el('button', { class: 'btn small ghost', type: 'button', onclick: () => { const L2 = layoutOf(s); L2.push({ key: uniqueKey(s.tables, 'table'), label: '새 표', columns: [{ key: 'col_1', label: '새 항목', type: 'string', required: false }] }); applyLayout(s, L2); again(); } }, '+ 표 추가')));
   refreshPickButtons();
 }
 
@@ -892,7 +919,7 @@ $('#btnSave').addEventListener('click', async () => {
   try {
     const s = draft.schema;
     s.notes = $('#tplNotes').value.trim().slice(0, 600);
-    const data = await callApi('/save', { name: $('#tplName').value.trim(), schema: { header: s.header, tables: s.tables, notes: s.notes } });
+    const data = await callApi('/save', { name: $('#tplName').value.trim(), schema: { header: s.header, tables: s.tables, notes: s.notes, header_index: Math.max(0, Math.min(Math.floor(Number(s.header_index)) || 0, s.tables.length)) } });
     if (!data || !ID_RE.test(String(data.template_id || ''))) throw new Error('저장 결과를 확인하지 못했습니다.');
     const list = store.get('demo_templates', []).filter((x) => x.id !== data.template_id);
     list.unshift({ id: data.template_id, name: data.name || $('#tplName').value.trim(), savedAt: Date.now() });
@@ -942,6 +969,10 @@ function normalizeResult(data) {
   for (const t of r.meta.tables) if (!Array.isArray(r.tables[t.key])) r.tables[t.key] = [];
   return r;
 }
+function resultLayout(r) {
+  const hi = Math.max(0, Math.min(Math.floor(Number(r.meta.header_index)) || 0, r.meta.tables.length));
+  const L = r.meta.tables.slice(); L.splice(hi, 0, 'H'); return L;
+}
 function renderResult() {
   const r = view.result;
   const body = $('#resultBody');
@@ -950,13 +981,16 @@ function renderResult() {
     body.append(el('div', { class: 'warnbox' }, el('strong', {}, '확인이 필요한 항목'),
       el('ul', {}, r.warnings.slice(0, 30).map((w) => el('li', {}, w)))));
   }
-  body.append(el('div', { class: 'section-head' }, el('h3', {}, '문서 상단')));
-  body.append(el('div', { class: 'grid-h' }, r.meta.header.map((f) =>
-    el('div', {}, el('label', { class: 'field' }, f.label),
-      el('input', { type: 'text', value: cellText(r.header[f.key]), 'aria-label': f.label,
-        onchange: (e) => { r.header[f.key] = parseCell(f.type, e.target.value); } })))));
-
-  r.meta.tables.forEach((t) => {
+  resultLayout(r).forEach((item) => {
+    if (item === 'H') {
+      body.append(el('div', { class: 'section-head' }, el('h3', {}, '문서 상단')));
+      body.append(el('div', { class: 'grid-h' }, r.meta.header.map((f) =>
+        el('div', {}, el('label', { class: 'field' }, f.label),
+          el('input', { type: 'text', value: cellText(r.header[f.key]), 'aria-label': f.label,
+            onchange: (e) => { r.header[f.key] = parseCell(f.type, e.target.value); } })))));
+      return;
+    }
+    const t = item;
     const rows = r.tables[t.key];
     const again = () => renderResult();
     body.append(el('div', { class: 'section-head' }, el('h3', {}, t.label + ' (' + rows.length + '행)'),
@@ -1030,13 +1064,14 @@ $('#btnDownload').addEventListener('click', () => {
       if (fmt === 'xlsx') {
         const wb = XLSX.utils.book_new();
         const used = new Set();
-        XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(headerAOA(r)), sheetName('문서 상단', used));
-        r.meta.tables.forEach((t) => XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(tableAOA(r, t)), sheetName(t.label, used)));
+        resultLayout(r).forEach((it) => {
+          if (it === 'H') XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(headerAOA(r)), sheetName('문서 상단', used));
+          else XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(tableAOA(r, it)), sheetName(it.label, used));
+        });
         const buf = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
         download(new Blob([buf], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }), 'production_report_' + stamp() + '.xlsx');
       } else {
-        const blocks = [[['[문서 상단]'], ...headerAOA(r)]];
-        r.meta.tables.forEach((t) => blocks.push([['[' + t.label + ']'], ...tableAOA(r, t)]));
+        const blocks = resultLayout(r).map((it) => (it === 'H' ? [['[문서 상단]'], ...headerAOA(r)] : [['[' + it.label + ']'], ...tableAOA(r, it)]));
         const aoa = blocks.flatMap((b, i) => (i ? [[''], ...b] : b));
         const csv = XLSX.utils.sheet_to_csv(XLSX.utils.aoa_to_sheet(aoa));
         download(new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8' }), 'production_report_' + stamp() + '.csv');
