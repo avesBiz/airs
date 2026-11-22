@@ -725,9 +725,66 @@ function moveButtons(list, idx, onChange) {
     el('button', { class: 'btn small ghost', type: 'button', 'aria-label': '위로', title: '위로', disabled: idx === 0, onclick: () => mv(-1) }, '↑'),
     el('button', { class: 'btn small ghost', type: 'button', 'aria-label': '아래로', title: '아래로', style: 'margin-left:4px', disabled: idx === list.length - 1, onclick: () => mv(1) }, '↓'));
 }
+const picked = new WeakSet();   // 표로 분리하려고 체크한 항목 (스키마에 섞이지 않게 별도로 보관)
+let editorNote = '';
+function refreshPickButtons() {
+  document.querySelectorAll('[data-pick-for]').forEach((b) => {
+    const n = Number(b.dataset.pickFor);
+    const list = n < 0 ? draft.schema.header : draft.schema.tables[n].columns;
+    const c = list.filter((f) => picked.has(f)).length;
+    b.disabled = c === 0;
+    b.querySelector('span').textContent = c ? ' (' + c + '개)' : '';
+  });
+}
+function fitKey(used, key) {
+  let k = key, i = 2;
+  while (used.has(k)) { k = key.slice(0, 36) + '_' + i; i += 1; }
+  used.add(k); return k;
+}
+// 선택한 항목을 새 표로 분리. source: 'header' 또는 표 번호
+function splitToTable(source) {
+  const s = draft.schema;
+  const list = source === 'header' ? s.header : s.tables[source].columns;
+  const items = list.filter((f) => picked.has(f));
+  if (!items.length) return;
+  const used = new Set();
+  const cols = items.map((f) => { picked.delete(f); return Object.assign({}, f, { key: fitKey(used, f.key) }); });
+  for (const f of items) list.splice(list.indexOf(f), 1);
+  const base = source === 'header' ? '새 표 (상단에서 분리)' : '새 표 (' + s.tables[source].label + '에서 분리)';
+  const tKey = uniqueKey(s.tables, 'table');
+  const at = source === 'header' ? 0 : source + 1;
+  let removed = '';
+  s.tables.splice(at, 0, { key: tKey, label: base.slice(0, 60), columns: cols });
+  if (source !== 'header') {
+    const src = s.tables[source];
+    if (!src.columns.length) { s.tables.splice(source, 1); removed = ' 원래 표는 열이 없어져 삭제했습니다.'; }
+  }
+  editorNote = items.length + '개 항목을 새 표로 분리했습니다. 표 이름과 열 이름을 확인해 주세요.' + removed;
+  renderEditor();
+}
+// 선택한 표 열을 상단 항목으로 이동
+function moveToHeader(ti) {
+  const s = draft.schema;
+  const t = s.tables[ti];
+  const items = t.columns.filter((f) => picked.has(f));
+  if (!items.length) return;
+  const used = new Set(s.header.map((f) => f.key));
+  items.forEach((f) => { picked.delete(f); s.header.push(Object.assign({}, f, { key: fitKey(used, f.key) })); });
+  t.columns = t.columns.filter((f) => !items.includes(f));
+  let removed = '';
+  if (!t.columns.length) { s.tables.splice(ti, 1); removed = ' 원래 표는 열이 없어져 삭제했습니다.'; }
+  editorNote = items.length + '개 항목을 상단 항목으로 옮겼습니다.' + removed;
+  renderEditor();
+}
+function pickButton(source, label) {
+  return el('button', { class: 'btn small ghost', type: 'button', 'data-pick-for': source === 'header' ? -1 : source, disabled: true,
+    onclick: () => splitToTable(source) }, label, el('span', {}, ''));
+}
 function fieldRow(list, idx, onChange) {
   const f = list[idx];
   const tr = el('tr', {},
+    el('td', {}, el('input', { type: 'checkbox', checked: picked.has(f), 'aria-label': '선택',
+      onchange: (e) => { if (e.target.checked) picked.add(f); else picked.delete(f); refreshPickButtons(); } })),
     el('td', {}, el('input', { type: 'text', value: f.label, 'aria-label': '항목 이름', maxlength: 60,
       onchange: (e) => { f.label = e.target.value.trim() || f.key; } })),
     el('td', {}, el('select', { 'aria-label': '형식', onchange: (e) => { f.type = e.target.value; if (f.type === 'checkbox' && !f.options) f.options = []; onChange(); } },
@@ -743,10 +800,10 @@ function fieldRow(list, idx, onChange) {
   return tr;
 }
 function fieldTable(list, onChange, emptyText) {
-  const thead = el('thead', {}, el('tr', {}, ['항목 이름', '형식', '선택지', '필수', '키', ''].map((h) => el('th', {}, h))));
+  const thead = el('thead', {}, el('tr', {}, ['선택', '항목 이름', '형식', '선택지', '필수', '키', ''].map((h) => el('th', {}, h))));
   const body = list.length
     ? list.map((_, i) => fieldRow(list, i, onChange))
-    : [el('tr', {}, el('td', { colspan: 6 }, el('span', { class: 'hint' }, emptyText)))];
+    : [el('tr', {}, el('td', { colspan: 7 }, el('span', { class: 'hint' }, emptyText)))];
   return el('div', { class: 'scroll' }, el('table', {}, thead, el('tbody', {}, body)));
 }
 function renderEditor() {
@@ -755,10 +812,13 @@ function renderEditor() {
   body.replaceChildren();
   const again = () => renderEditor();
 
+  if (editorNote) { body.append(el('div', { class: 'status show okk', style: 'margin:0 0 8px' }, editorNote)); editorNote = ''; }
+  body.append(el('p', { class: 'hint', style: 'margin:0 0 4px' }, '표로 따로 만들고 싶은 항목은 왼쪽 "선택"에 체크한 뒤 각 영역 아래의 "선택 항목을 새 표로 분리"를 누르세요.'));
   body.append(
     el('div', { class: 'section-head' }, el('h3', {}, '문서 상단 항목 (한 번만 적는 칸: 날짜, 작성자 등)'),
       el('button', { class: 'btn small ghost', type: 'button', onclick: () => { s.header.push({ key: uniqueKey(s.header, 'field'), label: '새 항목', type: 'string', required: false }); again(); } }, '+ 항목 추가')),
     fieldTable(s.header, again, '상단 항목이 없습니다.'),
+    el('div', { style: 'margin-top:8px' }, pickButton('header', '선택 항목을 새 표로 분리')),
   );
   s.tables.forEach((t, ti) => {
     body.append(
@@ -772,10 +832,14 @@ function renderEditor() {
           moveButtons(s.tables, ti, again),
           el('button', { class: 'btn small danger', type: 'button', onclick: () => { s.tables.splice(ti, 1); again(); } }, '표 삭제'))),
       fieldTable(t.columns, again, '열이 없습니다. 열을 추가해 주세요.'),
+      el('div', { class: 'row', style: 'gap:8px;margin-top:8px' },
+        pickButton(ti, '선택 항목을 새 표로 분리'),
+        el('button', { class: 'btn small ghost', type: 'button', 'data-pick-for': ti, 'data-to-header': '1', disabled: true, onclick: () => moveToHeader(ti) }, '선택 항목을 상단 항목으로', el('span', {}, ''))),
     );
   });
   body.append(el('div', { style: 'margin-top:14px' },
     el('button', { class: 'btn small ghost', type: 'button', onclick: () => { s.tables.push({ key: uniqueKey(s.tables, 'table'), label: '새 표', columns: [{ key: 'col_1', label: '새 항목', type: 'string', required: false }] }); again(); } }, '+ 표 추가')));
+  refreshPickButtons();
 }
 
 $('#btnPropose').addEventListener('click', async () => {
