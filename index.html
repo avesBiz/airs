@@ -1,0 +1,1119 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AIRS 제조기업 AI 운영센터</title>
+<style>
+  :root {
+    --navy: #0e1a33; --navy-2: #16264a; --navy-line: #22345c;
+    --bg: #f2f4f8; --card: #fff; --line: #e3e7ee; --text: #1b2437; --muted: #6b7587;
+    --primary: #2563eb; --primary-d: #1d4fc4; --primary-soft: #eaf1ff;
+    --ok: #16a34a; --ok-soft: #e7f6ec; --warn: #f59e0b; --warn-soft: #fff4dc; --bad: #dc2626; --bad-soft: #fdecec;
+    --purple: #7c3aed; --radius: 12px; --shadow: 0 1px 2px rgba(16,24,40,.04), 0 1px 3px rgba(16,24,40,.05);
+    --side-w: 236px;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body { margin: 0; background: var(--bg); color: var(--text); line-height: 1.5; font-size: 14.5px;
+    font-family: "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, -apple-system, sans-serif; }
+  svg.i { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+  button { font: inherit; cursor: pointer; color: inherit; }
+  h1, h2, h3, p { margin: 0; }
+  [hidden] { display: none !important; }
+
+  /* ---------- 레이아웃 ---------- */
+  .app { display: grid; grid-template-columns: var(--side-w) 1fr; min-height: 100vh; }
+  .side { background: var(--navy); color: #c9d3ea; display: flex; flex-direction: column; position: sticky; top: 0; height: 100vh; overflow-y: auto; }
+  .brand { padding: 22px 20px 16px; border-bottom: 1px solid var(--navy-line); }
+  .brand .row { display: flex; align-items: center; gap: 10px; }
+  .brand b { font-size: 26px; letter-spacing: .5px; color: #fff; }
+  .brand small { display: block; margin-top: 6px; font-size: 11.5px; color: #8fa0c4; }
+  .nav { padding: 14px 12px; display: grid; gap: 4px; flex: 1; align-content: start; }
+  .nav button { width: 100%; display: flex; align-items: center; gap: 12px; padding: 11px 12px; border: 0; background: transparent; border-radius: 10px; color: #c9d3ea; text-align: left; font-size: 14.5px; }
+  .nav button:hover { background: var(--navy-2); }
+  .nav button.on { background: var(--primary); color: #fff; font-weight: 600; }
+  .nav .chev { margin-left: auto; width: 15px; height: 15px; opacity: .7; transition: transform .15s; }
+  .nav .grp.open > button .chev { transform: rotate(90deg); }
+  .nav .sub { display: none; padding: 2px 0 6px 44px; }
+  .nav .grp.open .sub { display: grid; gap: 2px; }
+  .nav .sub button { padding: 8px 10px; font-size: 13.5px; color: #aebbd9; }
+  .nav .sub button.on { background: var(--navy-2); color: #fff; font-weight: 600; }
+  .sysbox { padding: 16px 20px 20px; border-top: 1px solid var(--navy-line); font-size: 12.5px; color: #9fb0d2; display: grid; gap: 4px; }
+  .sysbox b { color: #fff; font-size: 13px; }
+  .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #22c55e; margin-right: 6px; }
+
+  .main { min-width: 0; display: flex; flex-direction: column; }
+  .top { height: 56px; background: #fff; border-bottom: 1px solid var(--line); display: flex; align-items: center; gap: 12px; padding: 0 20px; position: sticky; top: 0; z-index: 5; }
+  .top .crumb { white-space: nowrap; display: flex; align-items: center; gap: 8px; color: var(--text); font-size: 13.5px; }
+  .top .sp { flex: 1; }
+  .ibtn { position: relative; width: 36px; height: 36px; border: 0; background: transparent; border-radius: 8px; display: grid; place-items: center; color: #4b5567; }
+  .ibtn:hover { background: #f1f3f7; }
+  .ibtn .badge { position: absolute; top: 2px; right: 2px; background: var(--bad); color: #fff; font-size: 10px; border-radius: 8px; min-width: 15px; height: 15px; display: grid; place-items: center; padding: 0 3px; }
+  .user { display: flex; align-items: center; gap: 10px; padding-left: 8px; font-size: 13px; line-height: 1.25; }
+  .user small { color: var(--muted); display: block; }
+  .avatar { width: 34px; height: 34px; border-radius: 50%; background: linear-gradient(135deg, #93b4f5, #4f7de0); color: #fff; display: grid; place-items: center; font-weight: 700; }
+  .menu-btn { display: none; }
+
+  .content { padding: 22px 24px 8px; flex: 1; }
+  .page-h { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; flex-wrap: wrap; margin-bottom: 16px; }
+  .page-h h1 { font-size: 25px; letter-spacing: -.3px; }
+  .page-h p { color: var(--muted); margin-top: 4px; }
+  .datebox { background: #fff; border: 1px solid var(--line); border-radius: 10px; padding: 9px 14px; font-size: 14px; min-width: 150px; text-align: left; display: flex; justify-content: space-between; gap: 12px; align-items: center; }
+  .foot { padding: 14px 24px; font-size: 12px; color: var(--muted); display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; border-top: 1px solid var(--line); background: #fff; }
+
+  /* ---------- 대시보드 ---------- */
+  .dash { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 16px; align-items: start; }
+  .col { display: grid; gap: 16px; min-width: 0; }
+  .kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
+  .two { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+  .panel { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px 18px; box-shadow: var(--shadow); min-width: 0; }
+  .panel > header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+  .panel h2 { font-size: 15.5px; }
+  .link { color: var(--muted); font-size: 12.5px; border: 0; background: none; padding: 0; }
+  .link:hover { color: var(--primary); }
+  .kpi { display: flex; gap: 12px; align-items: center; }
+  .kpi .d { white-space: nowrap; }
+  .kpi .ic { width: 42px; height: 42px; border-radius: 12px; display: grid; place-items: center; color: #fff; flex: none; }
+  .kpi .ic svg { width: 24px; height: 24px; }
+  .kpi .lb { color: var(--muted); font-size: 13px; }
+  .kpi .v { font-size: 26px; font-weight: 700; line-height: 1.2; }
+  .kpi .v small { font-size: 13px; font-weight: 500; margin-left: 2px; }
+  .kpi .d { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .up { color: var(--ok); } .down { color: var(--bad); }
+  .alert-banner { background: var(--bad-soft); border: 1px solid #f6caca; border-radius: 10px; padding: 12px 14px; display: flex; gap: 12px; align-items: center; margin-bottom: 14px; }
+  .alert-banner svg { color: var(--bad); width: 26px; height: 26px; }
+  .alert-banner b { color: var(--bad); }
+  .alert-banner p { font-size: 13px; color: #4b5567; }
+  .anom { display: grid; grid-template-columns: minmax(0, 1fr); gap: 14px; }
+  .anom h3 { font-size: 13.5px; margin-bottom: 8px; }
+  .donut-wrap { display: flex; align-items: center; gap: 14px; }
+  .donut { width: 104px; height: 104px; border-radius: 50%; flex: none; display: grid; place-items: center;
+    background: conic-gradient(#ef4444 0 62%, #f59e0b 62% 83%, #22c55e 83% 94%, #9aa3b2 94% 100%); }
+  .donut span { width: 62px; height: 62px; border-radius: 50%; background: #fff; display: grid; place-items: center; font-size: 11.5px; text-align: center; line-height: 1.2; }
+  .legend { display: grid; gap: 5px; font-size: 12.5px; flex: 1; }
+  .legend li { list-style: none; display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+  .legend ul { margin: 0; padding: 0; display: grid; gap: 5px; }
+  .legend i { width: 8px; height: 8px; border-radius: 50%; flex: none; }
+  .legend em { margin-left: auto; font-style: normal; color: var(--muted); }
+  .rel { font-size: 12.5px; color: #4b5567; display: grid; gap: 6px; margin: 0; padding: 0; list-style: none; }
+  .btns { display: flex; gap: 10px; justify-content: center; margin-top: 16px; }
+  .btn { padding: 9px 16px; border-radius: 8px; border: 1px solid var(--primary); background: var(--primary); color: #fff; font-weight: 600; font-size: 14px; }
+  .btn:hover { background: var(--primary-d); }
+  .btn:disabled { opacity: .5; cursor: not-allowed; }
+  .btn.ghost { background: #fff; color: var(--primary); }
+  .btn.ghost:hover { background: var(--primary-soft); }
+  .btn.plain { background: #fff; color: var(--text); border-color: var(--line); }
+  .btn.plain:hover { background: #f6f7fa; }
+  .btn.small { padding: 5px 10px; font-size: 13px; }
+  .btn.danger { background: #fff; color: #b42318; border-color: #f0b4b4; }
+  .btn.danger:hover { background: var(--bad-soft); }
+  .bars { display: grid; gap: 10px; margin: 6px 0 14px; }
+  .bar { display: grid; grid-template-columns: 54px 1fr 50px; gap: 10px; align-items: center; font-size: 13px; }
+  .bar .t { height: 22px; background: #f1f3f7; border-radius: 4px; overflow: hidden; }
+  .bar .t i { display: block; height: 100%; border-radius: 4px; }
+  .bar b { text-align: right; font-weight: 600; }
+  .stats3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; border-top: 1px solid var(--line); padding-top: 12px; }
+  .stats3 .lb { font-size: 12.5px; color: var(--muted); }
+  .stats3 .v { font-size: 20px; font-weight: 700; }
+  .stats3 .v small { font-size: 12px; font-weight: 500; }
+  .stats3 .d { font-size: 11.5px; color: var(--muted); }
+  .dt { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .dt th { text-align: left; color: var(--muted); font-weight: 500; font-size: 12px; padding: 6px 6px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+  .dt td { padding: 9px 6px; border-bottom: 1px solid #f0f2f6; white-space: nowrap; }
+  .dt tr:last-child td { border-bottom: 0; }
+  .dt .nm { display: flex; align-items: center; gap: 8px; }
+  .dt .nm i { width: 16px; height: 20px; border-radius: 4px; display: block; flex: none; }
+  .dt a { color: var(--text); text-decoration: none; cursor: pointer; }
+  .dt a:hover { color: var(--primary); text-decoration: underline; }
+  .tag { padding: 2px 9px; border-radius: 6px; font-size: 12px; font-weight: 600; }
+  .tag.ok { background: var(--ok-soft); color: var(--ok); }
+  .tag.wait { background: var(--warn-soft); color: #b45309; }
+  .agents { display: grid; gap: 4px; }
+  .agent { display: flex; align-items: center; gap: 12px; padding: 9px 0; border-bottom: 1px solid #f0f2f6; }
+  .agent:last-child { border-bottom: 0; }
+  .agent .ic { width: 36px; height: 36px; border-radius: 10px; display: grid; place-items: center; color: #fff; flex: none; }
+  .agent .ic svg { width: 19px; height: 19px; }
+  .agent b { font-size: 13.5px; display: block; }
+  .agent small { color: var(--muted); font-size: 12px; }
+  .agent .tx { flex: 1; min-width: 0; }
+  .sw { width: 52px; height: 26px; border-radius: 14px; border: 0; background: #cdd3de; position: relative; color: #fff; font-size: 11px; font-weight: 700; text-align: left; padding: 0 0 0 9px; flex: none; }
+  .sw::after { content: ""; position: absolute; top: 3px; right: 3px; width: 20px; height: 20px; border-radius: 50%; background: #fff; transition: all .15s; }
+  .sw[aria-pressed="true"] { background: var(--ok); }
+  .sw[aria-pressed="false"] { text-align: right; padding: 0 9px 0 0; }
+  .sw[aria-pressed="false"]::after { right: auto; left: 3px; }
+  .alerts { display: grid; }
+  .al { display: flex; gap: 10px; padding: 10px 0; border-bottom: 1px solid #f0f2f6; }
+  .al:last-child { border-bottom: 0; }
+  .al .ic { width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; flex: none; }
+  .al .ic svg { width: 16px; height: 16px; }
+  .al b { font-size: 13px; display: flex; justify-content: space-between; gap: 8px; }
+  .al b span { font-weight: 400; color: var(--muted); font-size: 12px; }
+  .al p { font-size: 12.5px; color: var(--muted); }
+  .chat { display: grid; gap: 10px; }
+  .msg { max-width: 88%; padding: 9px 12px; border-radius: 12px; font-size: 13px; }
+  .msg.me { background: var(--primary-soft); justify-self: end; }
+  .msg.ai { background: #f3f5f9; justify-self: start; }
+  .chat-in { display: flex; gap: 8px; margin-top: 10px; }
+  .chat-in input { flex: 1; padding: 9px 12px; border: 1px solid var(--line); border-radius: 20px; font: inherit; background: #f7f8fb; }
+  .send { width: 38px; height: 38px; border-radius: 50%; border: 0; background: var(--primary); color: #fff; display: grid; place-items: center; }
+  .quick { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+  .quick button { border: 0; background: transparent; display: grid; gap: 6px; justify-items: center; padding: 8px 2px; border-radius: 10px; font-size: 12px; color: #3b4556; }
+  .quick button:hover { background: #f3f5f9; }
+  .quick .qi { width: 40px; height: 40px; border-radius: 10px; display: grid; place-items: center; }
+  .quick2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; margin-top: 6px; }
+  .quick2 button { display: flex; align-items: center; justify-content: center; gap: 8px; border: 0; background: #f6f8fc; border-radius: 10px; padding: 10px; font-size: 13px; }
+  .quick2 button:hover { background: #edf1f9; }
+  .sample-note { background: var(--primary-soft); border: 1px solid #cfdcfb; color: #23407f; border-radius: 10px; padding: 8px 14px; font-size: 13px; margin-bottom: 16px; }
+
+  /* ---------- 생산일보 체험 (기존 기능) ---------- */
+  .banner { padding: 10px 14px; border-radius: 10px; margin-bottom: 12px; font-size: 13.5px; }
+  .banner.mock { background: #eef3ff; border: 1px solid #c9d8fb; color: #23407f; }
+  .banner.notice { background: var(--warn-soft); border: 1px solid #f0d28a; }
+  .steps { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin: 14px 0; }
+  .tab { padding: 12px 14px; border: 1px solid var(--line); background: #fff; border-radius: 10px; font-weight: 600; cursor: pointer; text-align: left; color: var(--muted); }
+  .tab small { display: block; font-weight: 400; margin-top: 2px; }
+  .tab[aria-selected="true"] { border-color: var(--primary); color: var(--primary); box-shadow: 0 0 0 1px var(--primary) inset; background: var(--primary-soft); }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px; margin-bottom: 16px; box-shadow: var(--shadow); }
+  .card h2 { font-size: 16.5px; margin-bottom: 12px; }
+  .card h3 { font-size: 14.5px; }
+  .row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+  .grow { flex: 1; min-width: 200px; }
+  label.field { display: block; font-size: 12.5px; color: var(--muted); margin-bottom: 4px; }
+  input[type=text], select, textarea { width: 100%; padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; font: inherit; background: #fff; color: var(--text); }
+  input[type=text]:focus, select:focus, textarea:focus { outline: 2px solid #b7cdf7; border-color: var(--primary); }
+  textarea { min-height: 64px; resize: vertical; }
+  .status { margin-top: 12px; padding: 10px 14px; border-radius: 8px; font-size: 14px; display: none; }
+  .status.show { display: block; }
+  .status.busy { background: #eef3ff; border: 1px solid #c9d8fb; }
+  .status.err { background: var(--bad-soft); border: 1px solid #f0b4b4; }
+  .status.okk { background: var(--ok-soft); border: 1px solid #b6e0c7; }
+  .spinner { display: inline-block; width: 12px; height: 12px; border: 2px solid #9db7ea; border-top-color: var(--primary); border-radius: 50%; animation: spin .8s linear infinite; vertical-align: -1px; margin-right: 6px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .hint { color: var(--muted); font-size: 12.5px; margin: 6px 0 0; }
+  .section-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin: 18px 0 8px; }
+  .scroll { overflow-x: auto; border: 1px solid var(--line); border-radius: 8px; }
+  .card table { border-collapse: collapse; width: 100%; font-size: 14px; }
+  .card th, .card td { padding: 6px 8px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: middle; white-space: nowrap; }
+  .card th { background: #f8f9fb; font-weight: 600; color: #3b4556; }
+  .card tr:last-child td { border-bottom: 0; }
+  .card td input[type=text] { min-width: 110px; padding: 5px 8px; }
+  .card td input.num { min-width: 80px; text-align: right; }
+  td .key { color: var(--muted); font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 12px; }
+  .grid-h { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; }
+  .warnbox { background: var(--warn-soft); border: 1px solid #f0d28a; border-radius: 8px; padding: 10px 14px; margin-bottom: 14px; font-size: 14px; }
+  .warnbox ul { margin: 6px 0 0; padding-left: 18px; }
+  .dl { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
+  .dl label { display: inline-flex; gap: 6px; align-items: center; cursor: pointer; }
+  .idbox { font-family: ui-monospace, Menlo, Consolas, monospace; background: #f1f3f6; padding: 2px 8px; border-radius: 6px; }
+  .soon { text-align: center; padding: 80px 20px; color: var(--muted); }
+  .soon h2 { color: var(--text); margin-bottom: 6px; font-size: 20px; }
+  .toast { position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%); background: #1b2437; color: #fff; padding: 10px 18px; border-radius: 10px; font-size: 13.5px; z-index: 50; box-shadow: 0 6px 20px rgba(0,0,0,.25); }
+
+  /* ---------- 반응형 ---------- */
+  @media (max-width: 1280px) { .dash { grid-template-columns: minmax(0, 1fr); } .rail { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; } }
+  @media (max-width: 1100px) { .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); } .two { grid-template-columns: minmax(0, 1fr); } }
+  @media (max-width: 900px) {
+    .kpi .v { font-size: 23px; }
+    .app { grid-template-columns: minmax(0, 1fr); }
+    .side { position: fixed; z-index: 20; left: 0; top: 0; width: var(--side-w); transform: translateX(-100%); transition: transform .2s; }
+    body.nav-open .side { transform: none; box-shadow: 0 0 0 100vmax rgba(0,0,0,.35); }
+    .menu-btn { display: grid; }
+    .user span { display: none; }
+    .rail { grid-template-columns: minmax(0, 1fr); }
+    .steps { grid-template-columns: minmax(0, 1fr); }
+    .content { padding: 16px 14px 8px; }
+  }
+  @media (max-width: 560px) { .kpis { grid-template-columns: minmax(0, 1fr); } .top .crumb span.cur { display: none; } }
+</style>
+</head>
+<body>
+<!-- 아이콘 모음 -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-home" viewBox="0 0 24 24"><path d="M3 11l9-8 9 8v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z"/></symbol>
+  <symbol id="i-doc" viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h6"/></symbol>
+  <symbol id="i-factory" viewBox="0 0 24 24"><path d="M3 21V10l6 4v-4l6 4V6h3v15z"/><path d="M3 21h18"/></symbol>
+  <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M8.5 12l2.5 2.5L16 9.5"/></symbol>
+  <symbol id="i-truck" viewBox="0 0 24 24"><path d="M2 6h11v10H2zM13 9h4l4 3v4h-8z"/><circle cx="6.5" cy="18.5" r="1.6"/><circle cx="17.5" cy="18.5" r="1.6"/></symbol>
+  <symbol id="i-bot" viewBox="0 0 24 24"><rect x="3" y="8" width="18" height="11" rx="2"/><path d="M12 4v4M9 13h.01M15 13h.01"/></symbol>
+  <symbol id="i-chat" viewBox="0 0 24 24"><path d="M21 12a8 8 0 0 1-11.5 7.2L4 20l1-4.2A8 8 0 1 1 21 12z"/></symbol>
+  <symbol id="i-report" viewBox="0 0 24 24"><path d="M4 20V4M4 20h16M8 16v-5M12 16V8M16 16v-3"/></symbol>
+  <symbol id="i-gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></symbol>
+  <symbol id="i-bell" viewBox="0 0 24 24"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.3-4.3"/></symbol>
+  <symbol id="i-upload" viewBox="0 0 24 24"><path d="M16 16l-4-4-4 4M12 12v9M20.4 18.4A5 5 0 0 0 18 9h-1.3A8 8 0 1 0 4 16.3"/></symbol>
+  <symbol id="i-box" viewBox="0 0 24 24"><path d="M21 8l-9-5-9 5v8l9 5 9-5zM3.3 8L12 13l8.7-5M12 22V13"/></symbol>
+  <symbol id="i-menu" viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18"/></symbol>
+  <symbol id="i-chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></symbol>
+  <symbol id="i-warn" viewBox="0 0 24 24"><path d="M12 3l10 18H2z"/><path d="M12 10v5M12 18h.01"/></symbol>
+  <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></symbol>
+  <symbol id="i-send" viewBox="0 0 24 24"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4z"/></symbol>
+  <symbol id="i-mail" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></symbol>
+  <symbol id="i-help" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.7.4-1 .9-1 1.7M12 17h.01"/></symbol>
+  <symbol id="i-cal" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></symbol>
+  <symbol id="i-bulb" viewBox="0 0 24 24"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-4 10.5c.7.7 1 1.5 1 2.5h6c0-1 .3-1.8 1-2.5A6 6 0 0 0 12 3z"/></symbol>
+</svg>
+
+<div class="app">
+  <!-- ===== 사이드바 ===== -->
+  <aside class="side" id="side">
+    <div class="brand">
+      <div class="row">
+        <svg width="38" height="34" viewBox="0 0 38 34" aria-hidden="true"><defs><linearGradient id="lg" x1="0" x2="1" y1="0" y2="1"><stop offset="0" stop-color="#4f9bff"/><stop offset="1" stop-color="#1d4fc4"/></linearGradient></defs><path d="M19 2L34 32h-7l-3-6.5H14L11 32H4z M19 12l-3.6 8.5h7.2z" fill="url(#lg)" fill-rule="evenodd"/></svg>
+        <b>AIRS</b>
+      </div>
+      <small>AI Business Intelligence Platform</small>
+    </div>
+    <nav class="nav" id="nav">
+      <button data-go="dashboard"><svg class="i"><use href="#i-home"/></svg>대시보드</button>
+      <button data-go="soon:문서 AI"><svg class="i"><use href="#i-doc"/></svg>문서 AI<svg class="i chev"><use href="#i-chev"/></svg></button>
+      <div class="grp" id="grpProd">
+        <button data-toggle="grpProd"><svg class="i"><use href="#i-factory"/></svg>생산관리<svg class="i chev"><use href="#i-chev"/></svg></button>
+        <div class="sub">
+          <button data-go="prod-report">생산일보 AI 읽기</button>
+        </div>
+      </div>
+      <button data-go="soon:품질관리"><svg class="i"><use href="#i-shield"/></svg>품질관리<svg class="i chev"><use href="#i-chev"/></svg></button>
+      <button data-go="soon:물류관리"><svg class="i"><use href="#i-truck"/></svg>물류관리<svg class="i chev"><use href="#i-chev"/></svg></button>
+      <button data-go="soon:AI Agent"><svg class="i"><use href="#i-bot"/></svg>AI Agent<svg class="i chev"><use href="#i-chev"/></svg></button>
+      <button data-go="soon:AI Chat"><svg class="i"><use href="#i-chat"/></svg>AI Chat<svg class="i chev"><use href="#i-chev"/></svg></button>
+      <button data-go="soon:보고서"><svg class="i"><use href="#i-report"/></svg>보고서<svg class="i chev"><use href="#i-chev"/></svg></button>
+      <button data-go="settings"><svg class="i"><use href="#i-gear"/></svg>설정</button>
+    </nav>
+    <div class="sysbox">
+      <b>시스템 상태</b>
+      <span><i class="dot"></i>정상 운영 중</span>
+      <span>버전 : AIRS 1.0.0</span>
+    </div>
+  </aside>
+
+  <!-- ===== 본문 ===== -->
+  <div class="main">
+    <header class="top">
+      <button class="ibtn menu-btn" id="menuBtn" aria-label="메뉴"><svg class="i"><use href="#i-menu"/></svg></button>
+      <div class="crumb"><svg class="i" style="width:17px;height:17px"><use href="#i-home"/></svg><span id="crumb">대시보드</span></div>
+      <div class="sp"></div>
+      <button class="ibtn" data-toast="검색은 준비 중입니다." aria-label="검색"><svg class="i"><use href="#i-search"/></svg></button>
+      <button class="ibtn" data-toast="알림은 대시보드에서 확인할 수 있습니다." aria-label="알림"><svg class="i"><use href="#i-bell"/></svg><span class="badge">3</span></button>
+      <button class="ibtn" data-toast="메일함은 준비 중입니다." aria-label="메일"><svg class="i"><use href="#i-mail"/></svg></button>
+      <button class="ibtn" data-toast="도움말은 준비 중입니다." aria-label="도움말"><svg class="i"><use href="#i-help"/></svg></button>
+      <div class="user"><span>체험 계정<small>관리자</small></span><div class="avatar" aria-hidden="true">체</div></div>
+    </header>
+
+    <main class="content">
+
+      <!-- ========== 대시보드 ========== -->
+      <section id="view-dashboard" data-title="대시보드">
+        <div class="page-h">
+          <div><h1>AIRS 제조기업 AI 운영센터</h1><p>기업의 문서와 데이터를 AI로 연결하여 업무를 자동화합니다.</p></div>
+          <div class="datebox" id="today"><span></span><svg class="i" style="width:17px;height:17px"><use href="#i-cal"/></svg></div>
+        </div>
+        <div class="sample-note" id="sampleNote">이 화면의 수치는 예시 데이터입니다. 실제로 동작하는 기능은 <b>생산관리 &gt; 생산일보 AI 읽기</b>입니다.</div>
+        <div class="dash">
+          <div class="col">
+            <div class="kpis">
+              <div class="panel kpi"><div class="ic" style="background:#2563eb"><svg class="i"><use href="#i-doc"/></svg></div><div><div class="lb">오늘 문서 처리</div><div class="v" id="kpiDocs">1,248<small>건</small></div><div class="d" id="kpiDocsD">전일 대비 <span class="up">▲ 12.4%</span></div></div></div>
+              <div class="panel kpi"><div class="ic" style="background:#22a06b"><svg class="i"><use href="#i-factory"/></svg></div><div><div class="lb">오늘 생산량</div><div class="v">12,430<small>EA</small></div><div class="d">전일 대비 <span class="up">▲ 8.2%</span></div></div></div>
+              <div class="panel kpi"><div class="ic" style="background:#f59e0b"><svg class="i"><use href="#i-warn"/></svg></div><div><div class="lb">불량률</div><div class="v">3.2<small>%</small></div><div class="d">전일 대비 <span class="down">▲ 0.7%</span></div></div></div>
+              <div class="panel kpi"><div class="ic" style="background:#7c3aed"><svg class="i"><use href="#i-truck"/></svg></div><div><div class="lb">납기 준수율</div><div class="v">98.4<small>%</small></div><div class="d">전일 대비 <span class="up">▲ 1.3%</span></div></div></div>
+            </div>
+
+            <div class="two">
+              <div class="panel">
+                <header><h2>AI 이상징후 분석</h2></header>
+                <div class="alert-banner"><svg class="i"><use href="#i-warn"/></svg><div><b>A제품 불량률</b>이 지난주 대비 <b>27% 증가</b>했습니다.<p>3호 설비에서 불량이 집중 발생하고 있습니다.</p></div></div>
+                <div class="anom">
+                  <div>
+                    <h3>주요 원인 추정</h3>
+                    <div class="donut-wrap">
+                      <div class="donut"><span>원인<br>분석</span></div>
+                      <div class="legend"><ul>
+                        <li><i style="background:#ef4444"></i>3호 설비 문제<em>62%</em></li>
+                        <li><i style="background:#f59e0b"></i>야간 작업 증가<em>21%</em></li>
+                        <li><i style="background:#22c55e"></i>원자재 LOT 이슈<em>11%</em></li>
+                        <li><i style="background:#9aa3b2"></i>기타 원인<em>6%</em></li>
+                      </ul></div>
+                    </div>
+                  </div>
+                  <div><h3>관련 데이터</h3>
+                    <ul class="rel"><li>· 대상 : A-100, A-200</li><li>· 분석 기준 : 불량률</li><li>· 비교 : 최근 7일 / 직전 7일</li></ul>
+                  </div>
+                </div>
+                <div class="btns"><button class="btn plain" data-toast="상세 분석은 준비 중입니다.">상세 분석 보기</button><button class="btn" data-toast="담당자 알림은 준비 중입니다.">담당자 알림 보내기</button></div>
+              </div>
+
+              <div class="panel">
+                <header><h2>생산 현황</h2><span class="link">오늘</span></header>
+                <div class="hint" style="margin:0 0 8px">제품별 생산량 (EA)</div>
+                <div class="bars">
+                  <div class="bar"><span>A-100</span><div class="t"><i style="width:87%;background:#2563eb"></i></div><b>5,240</b></div>
+                  <div class="bar"><span>B-200</span><div class="t"><i style="width:63%;background:#22a06b"></i></div><b>3,820</b></div>
+                  <div class="bar"><span>C-300</span><div class="t"><i style="width:40%;background:#f59e0b"></i></div><b>2,410</b></div>
+                  <div class="bar"><span>D-400</span><div class="t"><i style="width:16%;background:#7c3aed"></i></div><b>980</b></div>
+                </div>
+                <div class="stats3">
+                  <div><div class="lb">가동률</div><div class="v">87.4<small>%</small></div><div class="d">전일 대비 <span class="up">▲ 2.1%</span></div></div>
+                  <div><div class="lb">계획 대비 생산</div><div class="v">102.3<small>%</small></div><div class="d">전일 대비 <span class="up">▲ 5.4%</span></div></div>
+                  <div><div class="lb">누적 생산량</div><div class="v">245,320<small>EA</small></div><div class="d">전일 대비 <span class="up">▲ 9.8%</span></div></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="two">
+              <div class="panel">
+                <header><h2>최근 처리 문서</h2><span><button class="link" id="statsRefresh" hidden>새로고침</button> <button class="link" data-go="prod-report">전체보기 ›</button></span></header>
+                <div style="overflow-x:auto"><table class="dt">
+                  <thead id="recentHead"><tr><th>카테고리</th><th>문서명</th><th>처리건수</th><th>AI 처리율</th><th>상태</th></tr></thead>
+                  <tbody id="recentBody">
+                    <tr><td><span class="nm"><i style="background:#ef6a6a"></i>생산관리</span></td><td><a data-go="prod-report">생산일보_예시1</a></td><td>320</td><td>97.8%</td><td><span class="tag ok">완료</span></td></tr>
+                    <tr><td><span class="nm"><i style="background:#4fb97a"></i>품질관리</span></td><td>검사일보_예시</td><td>182</td><td>99.1%</td><td><span class="tag ok">완료</span></td></tr>
+                    <tr><td><span class="nm"><i style="background:#f5b13d"></i>물류관리</span></td><td>거래명세서_예시</td><td>421</td><td>98.6%</td><td><span class="tag ok">완료</span></td></tr>
+                    <tr><td><span class="nm"><i style="background:#f5b13d"></i>물류관리</span></td><td>발주서_예시</td><td>145</td><td>96.4%</td><td><span class="tag wait">검토중</span></td></tr>
+                    <tr><td><span class="nm"><i style="background:#f5b13d"></i>물류관리</span></td><td>출하서_예시</td><td>180</td><td>98.3%</td><td><span class="tag ok">완료</span></td></tr>
+                  </tbody></table></div>
+              </div>
+              <div class="panel">
+                <header><h2>AI Agent 상태</h2><span class="link">예시</span></header>
+                <div class="agents">
+                  <div class="agent"><div class="ic" style="background:#22a06b"><svg class="i"><use href="#i-bot"/></svg></div><div class="tx"><b>생산 이상징후 Agent</b><small>생산/불량 데이터 실시간 분석</small></div><button class="sw" aria-pressed="true" aria-label="생산 이상징후 Agent">ON</button></div>
+                  <div class="agent"><div class="ic" style="background:#2563eb"><svg class="i"><use href="#i-doc"/></svg></div><div class="tx"><b>문서 처리 Agent</b><small>이메일/팩스 문서 자동 수집 및 처리</small></div><button class="sw" aria-pressed="true" aria-label="문서 처리 Agent">ON</button></div>
+                  <div class="agent"><div class="ic" style="background:#f59e0b"><svg class="i"><use href="#i-cal"/></svg></div><div class="tx"><b>납기 위험 Agent</b><small>납기 지연 위험 분석 및 알림</small></div><button class="sw" aria-pressed="true" aria-label="납기 위험 Agent">ON</button></div>
+                  <div class="agent"><div class="ic" style="background:#7c3aed"><svg class="i"><use href="#i-mail"/></svg></div><div class="tx"><b>업무 알림 Agent</b><small>이상 발생 시 담당자께 알림</small></div><button class="sw" aria-pressed="true" aria-label="업무 알림 Agent">ON</button></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <aside class="col rail">
+            <div class="panel">
+              <header><h2>알림</h2><span class="link">전체보기 ›</span></header>
+              <div class="alerts">
+                <div class="al"><div class="ic" style="background:var(--bad-soft);color:var(--bad)"><svg class="i"><use href="#i-warn"/></svg></div><div><b>A-100 제품 불량률 이상<span>10:15</span></b><p>3호 설비에서 불량이 집중 발생했습니다.</p></div></div>
+                <div class="al"><div class="ic" style="background:var(--warn-soft);color:#b45309"><svg class="i"><use href="#i-bell"/></svg></div><div><b>납기 위험 주문 3건<span>09:32</span></b><p>출하 예정일을 확인해 주세요.</p></div></div>
+                <div class="al"><div class="ic" style="background:var(--primary-soft);color:var(--primary)"><svg class="i"><use href="#i-info"/></svg></div><div><b>문서 처리 완료<span>08:45</span></b><p>생산일보 320건이 처리되었습니다.</p></div></div>
+              </div>
+            </div>
+            <div class="panel">
+              <header><h2>AI Chat</h2><span class="link" style="color:var(--primary)">새 대화</span></header>
+              <div class="chat" id="chatLog">
+                <div class="msg me">이번 달 불량률 높은 제품 5개 보여줘</div>
+                <div class="msg ai">분석했습니다. 이번 달 불량률이 높은 제품 TOP 5는 다음과 같습니다.<br>1. A-100 4.8%<br>2. C-210 4.2%<br>3. B-330 3.9%</div>
+              </div>
+              <form class="chat-in" id="chatForm"><input type="text" id="chatIn" placeholder="메시지를 입력하세요..." autocomplete="off"><button class="send" aria-label="보내기"><svg class="i" style="width:17px;height:17px"><use href="#i-send"/></svg></button></form>
+            </div>
+            <div class="panel">
+              <header><h2>빠른 메뉴</h2></header>
+              <div class="quick">
+                <button data-go="prod-report"><span class="qi" style="background:#eaf1ff;color:#2563eb"><svg class="i"><use href="#i-upload"/></svg></span>문서 업로드</button>
+                <button data-go="prod-report"><span class="qi" style="background:#eef0f6;color:#5a6788"><svg class="i"><use href="#i-factory"/></svg></span>생산 조회</button>
+                <button data-go="soon:품질관리"><span class="qi" style="background:#e7f6ec;color:#16a34a"><svg class="i"><use href="#i-shield"/></svg></span>품질 현황</button>
+                <button data-go="soon:물류관리"><span class="qi" style="background:#fff4dc;color:#d97706"><svg class="i"><use href="#i-box"/></svg></span>재고 현황</button>
+              </div>
+              <div class="quick2">
+                <button data-go="soon:보고서"><svg class="i" style="color:#2563eb"><use href="#i-report"/></svg>보고서 생성</button>
+                <button data-go="soon:AI Agent"><svg class="i" style="color:#2563eb"><use href="#i-bulb"/></svg>AI 분석 요청</button>
+              </div>
+            </div>
+          </aside>
+        </div>
+      </section>
+
+      <!-- ========== 생산관리 > 생산일보 AI 읽기 ========== -->
+      <section id="view-prod-report" data-title="생산관리 › 생산일보 AI 읽기" hidden>
+        <div class="page-h"><div><h1>생산일보 AI 읽기</h1><p>양식을 한 번 등록하면, 손으로 쓴 생산일보를 AI가 읽어서 엑셀로 만들어 드립니다.</p></div></div>
+        <div id="mockBanner" class="banner mock" hidden>목업 모드입니다. 실제 AI를 호출하지 않고 예시 결과로 화면만 확인합니다. <button class="btn small ghost" data-go="settings" style="margin-left:8px">연결 설정</button></div>
+        <div class="banner notice" id="noticeBox"></div>
+
+        <div class="steps" role="tablist">
+          <button class="tab" role="tab" id="tab1" aria-selected="true" aria-controls="panel1">① 양식 등록<small>빈 양식을 올려 읽을 항목을 정합니다</small></button>
+          <button class="tab" role="tab" id="tab2" aria-selected="false" aria-controls="panel2">② 일보 읽기<small>작성된 일보를 올려 결과를 받습니다</small></button>
+        </div>
+
+        <section id="panel1" role="tabpanel" aria-labelledby="tab1">
+          <div class="card">
+            <h2>1. 빈 양식 올리기</h2>
+            <div class="row">
+              <div class="grow"><label class="field" for="tplFile">양식 파일 (jpg, png, pdf)</label><input type="file" id="tplFile" accept=".jpg,.jpeg,.png,.pdf,image/jpeg,image/png,application/pdf"></div>
+              <button class="btn" id="btnPropose">AI로 항목 분석하기</button>
+            </div>
+            <p class="hint">작성된 일보 한 장을 올려도 됩니다. 용지 전체가 나오게 찍거나 스캔해 주세요.</p>
+            <div class="status" id="status1" role="status"></div>
+          </div>
+          <div class="card" id="editorCard" hidden>
+            <h2>2. 항목 확인하고 고치기</h2>
+            <p class="hint" style="margin-top:-6px;margin-bottom:12px">AI가 제안한 초안입니다. 항목 이름, 형식, 선택지, 순서를 고치고 필요 없는 항목은 지워 주세요.</p>
+            <div class="row"><div class="grow"><label class="field" for="tplName">양식 이름</label><input type="text" id="tplName" maxlength="60" placeholder="예: O/BELT ASS'Y 생산일보"></div></div>
+            <div id="editorBody"></div>
+            <div style="margin-top:14px"><label class="field" for="tplNotes">양식 설명 (선택) - AI가 읽을 때 참고합니다</label><textarea id="tplNotes" maxlength="600" placeholder="예: 용지가 뒤집혀 있을 수 있음. 한 행이 하나의 생산 건."></textarea></div>
+            <div class="row" style="margin-top:16px"><button class="btn" id="btnSave">저장하고 사용하기</button></div>
+            <div class="status" id="status1b" role="status"></div>
+          </div>
+        </section>
+
+        <section id="panel2" role="tabpanel" aria-labelledby="tab2" hidden>
+          <div class="card">
+            <h2>1. 양식 선택하고 일보 올리기</h2>
+            <div class="row">
+              <div class="grow"><label class="field" for="tplSelect">등록한 양식</label><select id="tplSelect"></select></div>
+              <div class="grow"><label class="field" for="tplIdInput">또는 양식 ID 직접 입력</label><input type="text" id="tplIdInput" placeholder="tpl_xxxxxxxxxxxx" autocomplete="off"></div>
+              <button class="btn small danger" id="btnForget" title="이 브라우저의 목록에서만 지웁니다">목록에서 지우기</button>
+            </div>
+            <div class="row" style="margin-top:12px">
+              <div class="grow"><label class="field" for="rptFile">작성된 생산일보 (jpg, png, pdf)</label><input type="file" id="rptFile" accept=".jpg,.jpeg,.png,.pdf,image/jpeg,image/png,application/pdf"></div>
+              <button class="btn" id="btnConvert">읽기 시작</button>
+            </div>
+            <p class="hint">이미지는 5MB, PDF는 10MB 이하. 용지 전체가 나오게 스캔해 주세요.</p>
+            <div class="status" id="status2" role="status"></div>
+          </div>
+          <div class="card" id="resultCard" hidden>
+            <h2>2. 결과 확인하고 고치기</h2>
+            <div id="resultBody"></div>
+            <div class="section-head" style="margin-top:22px"><h3>3. 내려받기</h3></div>
+            <div class="dl">
+              <label><input type="radio" name="fmt" value="xlsx" checked> 엑셀 (.xlsx, 표마다 시트)</label>
+              <label><input type="radio" name="fmt" value="csv"> CSV (.csv)</label>
+              <label><input type="radio" name="fmt" value="json"> JSON (.json)</label>
+              <button class="btn" id="btnDownload">내려받기</button>
+            </div>
+            <div class="status" id="status2b" role="status"></div>
+          </div>
+        </section>
+      </section>
+
+      <!-- ========== 설정 ========== -->
+      <section id="view-settings" data-title="설정" hidden>
+        <div class="page-h"><div><h1>설정</h1><p>생산일보 AI 읽기의 연결 주소를 정합니다.</p></div></div>
+        <section class="card" id="cfgBox">
+          <h2>연결 설정 (내부용) <span id="cfgState" class="hint"></span></h2>
+          <p class="hint" style="margin-top:-6px">이 브라우저에만 저장되며 HTML에는 들어가지 않습니다. 세 주소를 모두 비우면 목업 모드입니다.</p>
+          <div class="grid-h" style="margin-top:10px">
+            <div><label class="field" for="cfgPropose">/propose 웹훅 URL</label><input type="text" id="cfgPropose" placeholder="https://xxx.app.n8n.cloud/webhook/..." autocomplete="off"></div>
+            <div><label class="field" for="cfgSave">/save 웹훅 URL</label><input type="text" id="cfgSave" autocomplete="off"></div>
+            <div><label class="field" for="cfgConvert">/convert 웹훅 URL</label><input type="text" id="cfgConvert" autocomplete="off"></div>
+            <div><label class="field" for="cfgStats">/stats 웹훅 URL (대시보드 집계, 선택)</label><input type="text" id="cfgStats" autocomplete="off"></div>
+            <div><label class="field" for="cfgHName">인증 헤더 이름 (없으면 비움)</label><input type="text" id="cfgHName" placeholder="예: X-API-Key" autocomplete="off"></div>
+            <div><label class="field" for="cfgHVal">인증 헤더 값</label><input type="text" id="cfgHVal" autocomplete="off"></div>
+          </div>
+          <div class="row" style="margin-top:12px"><button class="btn" id="cfgSaveBtn" type="button">설정 저장</button></div>
+        </section>
+      </section>
+
+      <!-- ========== 준비 중 ========== -->
+      <section id="view-soon" data-title="" hidden>
+        <div class="card soon"><h2 id="soonTitle">준비 중</h2><p>이 메뉴는 아직 준비 중입니다. 지금 사용할 수 있는 기능은 <b>생산관리 &gt; 생산일보 AI 읽기</b>입니다.</p>
+          <div style="margin-top:16px"><button class="btn" data-go="prod-report">생산일보 AI 읽기로 가기</button></div></div>
+      </section>
+    </main>
+
+    <footer class="foot"><span>AIRS AI Business Intelligence Platform · 체험판입니다. 읽기 결과는 틀릴 수 있으니 내려받기 전에 꼭 확인해 주세요.</span><span>© AIRS</span></footer>
+  </div>
+</div>
+<div class="toast" id="toast" hidden></div>
+
+<!-- 엑셀 생성용 SheetJS (브라우저에서 파일을 만듭니다) -->
+<script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+<script>
+'use strict';
+
+/* ============ 설정 ============ */
+const CONFIG = {
+  NOTICE: '체험판입니다. 개인정보나 기밀 문서는 올리지 마세요. 파일은 읽기를 위해 외부 AI 서비스로 전송됩니다.',
+  REQUEST_TIMEOUT_MS: 150000,
+};
+window.__DEMO_CFG__ = null;   // n8n에서 페이지를 내보낼 때 이 줄이 실제 설정으로 바뀝니다.
+const store0 = (() => { try { return JSON.parse(localStorage.getItem('demo_cfg') || '{}'); } catch (e) { return {}; } })();
+let CFG = window.__DEMO_CFG__ || store0;
+const endpointOf = (path) => (CFG.urls || {})[path] || '';
+const MOCK = new URLSearchParams(location.search).has('mock') || !['/propose', '/save', '/convert'].some(endpointOf);
+const LIMITS = { imageMB: 5, pdfMB: 10 };
+const TYPES = [['string', '텍스트'], ['number', '숫자'], ['date', '날짜'], ['time', '시간'], ['checkbox', '체크박스']];
+const KEY_RE = /^[a-z][a-z0-9_]{0,40}$/;
+const ID_RE = /^tpl_[a-z0-9]{6,32}$/;
+
+/* ============ 작은 도구들 ============ */
+const $ = (s, r = document) => r.querySelector(s);
+function el(tag, attrs, ...kids) {
+  const n = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs || {})) {
+    if (v === undefined || v === null || v === false) continue;
+    if (k === 'class') n.className = v;
+    else if (k === 'text') n.textContent = v;
+    else if (k.startsWith('on')) n.addEventListener(k.slice(2), v);
+    else if (k === 'value') n.value = v;
+    else if (k === 'checked') n.checked = !!v;
+    else n.setAttribute(k, v === true ? '' : v);
+  }
+  for (const c of kids.flat()) if (c !== null && c !== undefined && c !== false) n.append(c.nodeType ? c : document.createTextNode(String(c)));
+  return n;
+}
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+const memStore = {};   // 브라우저 저장소를 못 쓰는 환경(샌드박스 iframe 등)에서는 이 탭을 닫기 전까지만 기억합니다.
+const store = {
+  get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return k in memStore ? memStore[k] : d; } },
+  set(k, v) { memStore[k] = v; try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { /* 저장소를 못 쓰는 환경 */ } },
+};
+function setStatus(id, kind, text) {
+  const n = $('#' + id);
+  n.className = 'status' + (kind ? ' show ' + kind : '');
+  n.replaceChildren();
+  if (!kind) return;
+  if (kind === 'busy') n.append(el('span', { class: 'spinner' }));
+  n.append(text);
+}
+function checkFile(f) {
+  if (!f) return '파일을 선택해 주세요.';
+  const extOk = /\.(jpe?g|png|pdf)$/i.test(f.name);
+  const typeOk = !f.type || ['image/jpeg', 'image/png', 'application/pdf'].includes(f.type);
+  if (!extOk || !typeOk) return 'jpg, png, pdf 파일만 올릴 수 있습니다.';
+  const isPdf = /\.pdf$/i.test(f.name);
+  const mb = isPdf ? LIMITS.pdfMB : LIMITS.imageMB;
+  if (f.size > mb * 1024 * 1024) return (isPdf ? 'PDF는 ' : '이미지는 ') + mb + 'MB 이하여야 합니다.';
+  return '';
+}
+function uniqueKey(list, base) {
+  const used = new Set(list.map((f) => f.key));
+  let i = 1, k = base + '_' + i;
+  while (used.has(k)) { i += 1; k = base + '_' + i; }
+  return k;
+}
+function sanitizeKey(raw, used, fallback) {
+  let k = String(raw || '').toLowerCase().replace(/[^a-z0-9_]/g, '_').replace(/^[^a-z]+/, '');
+  if (!k) k = fallback;
+  k = k.slice(0, 40);
+  let out = k, i = 2;
+  while (used.has(out)) { out = k.slice(0, 36) + '_' + i; i += 1; }
+  used.add(out);
+  return out;
+}
+
+/* ============ API (목업 / 실제) ============ */
+async function callApi(path, body) {
+  if (MOCK) return mockApi(path, body);
+  const ctl = new AbortController();
+  const timer = setTimeout(() => ctl.abort(), CONFIG.REQUEST_TIMEOUT_MS);
+  try {
+    const isForm = body instanceof FormData;
+    const url = endpointOf(path);
+    if (!url) throw new Error(path + ' 주소가 설정되지 않았습니다. 상단 연결 설정을 확인해 주세요.');
+    const headers = isForm ? {} : { 'Content-Type': 'application/json' };
+    if (CFG.hname && CFG.hval) headers[CFG.hname] = CFG.hval;
+    const res = await fetch(url, {
+      method: 'POST',
+      body: isForm ? body : JSON.stringify(body),
+      headers,
+      signal: ctl.signal,
+    });
+    let data = null;
+    try { data = await res.json(); } catch (e) { /* JSON이 아닌 응답 */ }
+    if (!res.ok || (data && data.ok === false)) throw new Error((data && (data.error || data.message)) || '요청에 실패했습니다 (' + res.status + ')');
+    return data;
+  } catch (e) {
+    if (e.name === 'AbortError') throw new Error('시간이 너무 오래 걸려 중단했습니다. 잠시 뒤 다시 시도해 주세요.');
+    if (e instanceof TypeError) throw new Error('서버에 연결하지 못했습니다. 네트워크를 확인해 주세요.');
+    throw e;
+  } finally { clearTimeout(timer); }
+}
+
+const SAMPLE_SCHEMA = {
+  name_guess: "O/BELT ASS'Y 생산일보",
+  header: [
+    { key: 'production_date', label: '생산 일', type: 'date', required: true },
+    { key: 'equipment_name', label: '설비명', type: 'text', required: false },
+    { key: 'operator_name', label: '작업자', type: 'string', required: false },
+    { key: 'sign_1', label: '작성(서명)', type: 'string', required: false },
+  ],
+  tables: [
+    { key: 'production', label: '생산 및 불량 현황', columns: [
+      { key: 'no', label: 'NO.', type: 'number', required: false },
+      { key: 'project', label: 'Project', type: 'checkbox', required: false, options: ['OV1', '9BQC', 'US4', 'PU'] },
+      { key: 'finish', label: '사양', type: 'checkbox', required: false, options: ['SATIN', 'PVD', 'ETF', 'BL'] },
+      { key: 'position', label: 'FRT/RR/CTR', type: 'checkbox', required: false, options: ['FRT', 'RR', 'CTR'] },
+      { key: 'side', label: 'LH/RH', type: 'checkbox', required: false, options: ['LH', 'RH'] },
+      { key: 'lot', label: '단면 Lot.', type: 'string', required: false },
+      { key: 'start_time', label: '가동 시작', type: 'time', required: false },
+      { key: 'end_time', label: '가동 종료', type: 'time', required: false },
+      { key: 'good_qty', label: '양품수량', type: 'number', required: false },
+      { key: 'defect_subtotal', label: '불량수량 subtotal', type: 'number', required: false },
+      { key: 'remarks', label: 'Remarks', type: 'string', required: false },
+    ] },
+    { key: 'downtime', label: '비가동 유형 및 시간', columns: [
+      { key: 'main_code', label: '대분류', type: 'string', required: false },
+      { key: 'sub_code', label: '소분류', type: 'string', required: false },
+      { key: 'start_time', label: '시작', type: 'time', required: false },
+      { key: 'end_time', label: '종료', type: 'time', required: false },
+      { key: 'remarks', label: 'Remarks', type: 'string', required: false },
+    ] },
+  ],
+  notes: '',
+};
+function mockValue(c, i) {
+  switch (c.type) {
+    case 'number': return 100 + i * 7;
+    case 'time': return i === 0 ? '08:30' : '17:30';
+    case 'date': return new Date().toISOString().slice(0, 10);
+    case 'checkbox': return (c.options || []).slice(0, 1);
+    default: return '예시 ' + (i + 1);
+  }
+}
+function mockResult(id, schema) {
+  const header = {};
+  (schema.header || []).forEach((f, i) => { header[f.key] = i === 1 ? null : mockValue(f, i); });
+  const tables = {};
+  (schema.tables || []).forEach((t) => {
+    tables[t.key] = [0, 1].map((r) => Object.fromEntries(t.columns.map((c, i) => [c.key, mockValue(c, i + r)])));
+  });
+  return {
+    template_id: id, header, tables,
+    meta: {
+      header: (schema.header || []).map((f) => ({ key: f.key, label: f.label, type: f.type })),
+      tables: (schema.tables || []).map((t) => ({ key: t.key, label: t.label, columns: t.columns.map((c) => ({ key: c.key, label: c.label, type: c.type })) })),
+    },
+    warnings: ['목업 모드: 실제로 읽은 값이 아닌 예시 데이터입니다.'],
+  };
+}
+async function mockApi(path, body) {
+  await sleep(900);
+  if (path === '/propose') return { output: JSON.parse(JSON.stringify(SAMPLE_SCHEMA)) };
+  if (path === '/save') {
+    const id = 'tpl_mock' + Math.random().toString(36).slice(2, 8);
+    store.set('demo_schema_' + id, body.schema);
+    return { template_id: id, name: body.name };
+  }
+  if (path === '/convert') {
+    const id = body.get('template_id');
+    return mockResult(id, store.get('demo_schema_' + id, null) || SAMPLE_SCHEMA);
+  }
+  throw new Error('알 수 없는 요청입니다.');
+}
+
+/* ============ 탭 ============ */
+function showTab(n) {
+  for (const i of [1, 2]) {
+    $('#tab' + i).setAttribute('aria-selected', String(i === n));
+    $('#panel' + i).hidden = i !== n;
+  }
+  if (n === 2) refreshTemplateSelect();
+}
+$('#tab1').addEventListener('click', () => showTab(1));
+$('#tab2').addEventListener('click', () => showTab(2));
+
+/* ============ 1. 양식 등록 ============ */
+const draft = { schema: null };
+
+function normalizeSchema(src) {
+  const out = { header: [], tables: [], notes: String((src && src.notes) || '').slice(0, 600) };
+  const fix = (f, used, prefix) => {
+    const type = TYPES.some((t) => t[0] === f.type) ? f.type : 'string';
+    const o = { key: sanitizeKey(f.key, used, prefix), label: String(f.label || f.key || '항목').slice(0, 60), type, required: !!f.required };
+    if (type === 'checkbox') o.options = (Array.isArray(f.options) ? f.options : []).map((x) => String(x).trim()).filter(Boolean).slice(0, 20);
+    return o;
+  };
+  const hUsed = new Set();
+  out.header = (Array.isArray(src.header) ? src.header : []).map((f) => fix(f, hUsed, 'field'));
+  const tUsed = new Set();
+  out.tables = (Array.isArray(src.tables) ? src.tables : []).map((t) => {
+    const used = new Set();
+    return { key: sanitizeKey(t.key, tUsed, 'table'), label: String(t.label || t.key || '표').slice(0, 60),
+      columns: (Array.isArray(t.columns) ? t.columns : []).map((c) => fix(c, used, 'col')) };
+  });
+  return out;
+}
+
+function moveButtons(list, idx, onChange) {
+  const mv = (d) => { const j = idx + d; if (j < 0 || j >= list.length) return; [list[idx], list[j]] = [list[j], list[idx]]; onChange(); };
+  return el('span', { style: 'white-space:nowrap' },
+    el('button', { class: 'btn small ghost', type: 'button', 'aria-label': '위로', title: '위로', disabled: idx === 0, onclick: () => mv(-1) }, '↑'),
+    el('button', { class: 'btn small ghost', type: 'button', 'aria-label': '아래로', title: '아래로', style: 'margin-left:4px', disabled: idx === list.length - 1, onclick: () => mv(1) }, '↓'));
+}
+function fieldRow(list, idx, onChange) {
+  const f = list[idx];
+  const tr = el('tr', {},
+    el('td', {}, el('input', { type: 'text', value: f.label, 'aria-label': '항목 이름', maxlength: 60,
+      onchange: (e) => { f.label = e.target.value.trim() || f.key; } })),
+    el('td', {}, el('select', { 'aria-label': '형식', onchange: (e) => { f.type = e.target.value; if (f.type === 'checkbox' && !f.options) f.options = []; onChange(); } },
+      TYPES.map(([v, t]) => el('option', { value: v, selected: f.type === v }, t)))),
+    el('td', {}, f.type === 'checkbox'
+      ? el('input', { type: 'text', value: (f.options || []).join(', '), placeholder: '선택지를 쉼표로 구분', 'aria-label': '선택지',
+          style: 'min-width:200px', onchange: (e) => { f.options = e.target.value.split(',').map((x) => x.trim()).filter(Boolean); } })
+      : el('span', { class: 'hint' }, '-')),
+    el('td', {}, el('input', { type: 'checkbox', checked: f.required, 'aria-label': '필수', onchange: (e) => { f.required = e.target.checked; } })),
+    el('td', {}, el('span', { class: 'key', text: f.key })),
+    el('td', {}, moveButtons(list, idx, onChange), el('button', { class: 'btn small danger', type: 'button', style: 'margin-left:6px', onclick: () => { list.splice(idx, 1); onChange(); } }, '삭제')),
+  );
+  return tr;
+}
+function fieldTable(list, onChange, emptyText) {
+  const thead = el('thead', {}, el('tr', {}, ['항목 이름', '형식', '선택지', '필수', '키', ''].map((h) => el('th', {}, h))));
+  const body = list.length
+    ? list.map((_, i) => fieldRow(list, i, onChange))
+    : [el('tr', {}, el('td', { colspan: 6 }, el('span', { class: 'hint' }, emptyText)))];
+  return el('div', { class: 'scroll' }, el('table', {}, thead, el('tbody', {}, body)));
+}
+function renderEditor() {
+  const s = draft.schema;
+  const body = $('#editorBody');
+  body.replaceChildren();
+  const again = () => renderEditor();
+
+  body.append(
+    el('div', { class: 'section-head' }, el('h3', {}, '문서 상단 항목 (한 번만 적는 칸: 날짜, 작성자 등)'),
+      el('button', { class: 'btn small ghost', type: 'button', onclick: () => { s.header.push({ key: uniqueKey(s.header, 'field'), label: '새 항목', type: 'string', required: false }); again(); } }, '+ 항목 추가')),
+    fieldTable(s.header, again, '상단 항목이 없습니다.'),
+  );
+  s.tables.forEach((t, ti) => {
+    body.append(
+      el('div', { class: 'section-head' },
+        el('div', { class: 'row', style: 'gap:8px;flex:1' },
+          el('h3', {}, '표 ' + (ti + 1)),
+          el('input', { type: 'text', value: t.label, 'aria-label': '표 이름', maxlength: 60, style: 'max-width:320px',
+            onchange: (e) => { t.label = e.target.value.trim() || t.key; } })),
+        el('div', { class: 'row', style: 'gap:8px' },
+          el('button', { class: 'btn small ghost', type: 'button', onclick: () => { t.columns.push({ key: uniqueKey(t.columns, 'col'), label: '새 항목', type: 'string', required: false }); again(); } }, '+ 열 추가'),
+          moveButtons(s.tables, ti, again),
+          el('button', { class: 'btn small danger', type: 'button', onclick: () => { s.tables.splice(ti, 1); again(); } }, '표 삭제'))),
+      fieldTable(t.columns, again, '열이 없습니다. 열을 추가해 주세요.'),
+    );
+  });
+  body.append(el('div', { style: 'margin-top:14px' },
+    el('button', { class: 'btn small ghost', type: 'button', onclick: () => { s.tables.push({ key: uniqueKey(s.tables, 'table'), label: '새 표', columns: [{ key: 'col_1', label: '새 항목', type: 'string', required: false }] }); again(); } }, '+ 표 추가')));
+}
+
+$('#btnPropose').addEventListener('click', async () => {
+  const f = $('#tplFile').files[0];
+  const bad = checkFile(f);
+  if (bad) return setStatus('status1', 'err', bad);
+  const btn = $('#btnPropose');
+  btn.disabled = true;
+  setStatus('status1', 'busy', 'AI가 양식을 분석하고 있습니다. 보통 수십 초 걸립니다.');
+  $('#editorCard').hidden = true;
+  try {
+    const fd = new FormData();
+    fd.append('file', f);
+    const data = await callApi('/propose', fd);
+    const out = data && (data.output || (data.header || data.tables ? data : null));
+    if (!out || typeof out !== 'object') throw new Error('AI 응답을 해석하지 못했습니다. 다시 시도해 주세요.');
+    draft.schema = normalizeSchema(out);
+    if (!draft.schema.tables.length) throw new Error('표를 찾지 못했습니다. 용지 전체가 나온 이미지로 다시 시도해 주세요.');
+    $('#tplName').value = String(out.name_guess || '').slice(0, 60);
+    $('#tplNotes').value = draft.schema.notes;
+    renderEditor();
+    $('#editorCard').hidden = false;
+    setStatus('status1', 'okk', '분석이 끝났습니다. 아래에서 항목을 확인하고 고쳐 주세요.');
+    $('#editorCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  } catch (e) {
+    setStatus('status1', 'err', e.message);
+  } finally { btn.disabled = false; }
+});
+
+function validateDraft() {
+  const name = $('#tplName').value.trim();
+  if (!name) return '양식 이름을 입력해 주세요.';
+  const s = draft.schema;
+  if (!s.tables.length) return '표가 최소 1개 필요합니다.';
+  for (const t of s.tables) {
+    if (!t.columns.length) return "표 '" + t.label + "'에 열이 없습니다.";
+  }
+  const all = [...s.header, ...s.tables.flatMap((t) => t.columns)];
+  for (const f of all) {
+    if (f.type === 'checkbox' && !(f.options && f.options.length)) return "체크박스 항목 '" + f.label + "'에 선택지를 입력해 주세요.";
+  }
+  return '';
+}
+$('#btnSave').addEventListener('click', async () => {
+  const bad = validateDraft();
+  if (bad) return setStatus('status1b', 'err', bad);
+  const btn = $('#btnSave');
+  btn.disabled = true;
+  setStatus('status1b', 'busy', '저장하고 있습니다.');
+  try {
+    const s = draft.schema;
+    s.notes = $('#tplNotes').value.trim().slice(0, 600);
+    const data = await callApi('/save', { name: $('#tplName').value.trim(), schema: { header: s.header, tables: s.tables, notes: s.notes } });
+    if (!data || !ID_RE.test(String(data.template_id || ''))) throw new Error('저장 결과를 확인하지 못했습니다.');
+    const list = store.get('demo_templates', []).filter((x) => x.id !== data.template_id);
+    list.unshift({ id: data.template_id, name: data.name || $('#tplName').value.trim(), savedAt: Date.now() });
+    store.set('demo_templates', list.slice(0, 30));
+    const n = $('#status1b');
+    n.className = 'status show okk';
+    n.replaceChildren('저장했습니다. 양식 ID: ', el('span', { class: 'idbox', text: data.template_id }), ' ',
+      el('button', { class: 'btn small', type: 'button', style: 'margin-left:8px', onclick: () => { refreshTemplateSelect(data.template_id); showTab(2); } }, '이 양식으로 일보 읽으러 가기'));
+  } catch (e) {
+    setStatus('status1b', 'err', e.message);
+  } finally { btn.disabled = false; }
+});
+
+/* ============ 2. 일보 읽기 ============ */
+function refreshTemplateSelect(selectId) {
+  const sel = $('#tplSelect');
+  const list = store.get('demo_templates', []);
+  const keep = selectId || sel.value;
+  sel.replaceChildren();
+  if (!list.length) sel.append(el('option', { value: '' }, '(등록한 양식이 없습니다)'));
+  list.forEach((t) => sel.append(el('option', { value: t.id, selected: t.id === keep }, t.name + '  ·  ' + t.id)));
+  $('#btnForget').disabled = !list.length;
+}
+$('#btnForget').addEventListener('click', () => {
+  const id = $('#tplSelect').value;
+  if (!id) return;
+  store.set('demo_templates', store.get('demo_templates', []).filter((x) => x.id !== id));
+  refreshTemplateSelect();
+});
+
+const view = { result: null };
+
+function parseCell(type, raw) {
+  const v = raw.trim();
+  if (type === 'checkbox') return v ? v.split(',').map((x) => x.trim()).filter(Boolean) : [];
+  if (v === '') return null;
+  if (type === 'number') { const n = Number(v.replace(/,/g, '')); return Number.isFinite(n) ? n : v; }
+  return v;
+}
+function cellText(v) {
+  if (v === null || v === undefined) return '';
+  return Array.isArray(v) ? v.join(', ') : String(v);
+}
+function normalizeResult(data) {
+  if (!data || typeof data !== 'object' || !data.meta || !data.meta.tables) throw new Error('결과 형식을 확인하지 못했습니다. 다시 시도해 주세요.');
+  const r = { template_id: data.template_id, header: data.header || {}, tables: data.tables || {}, meta: data.meta, warnings: Array.isArray(data.warnings) ? data.warnings : [] };
+  for (const t of r.meta.tables) if (!Array.isArray(r.tables[t.key])) r.tables[t.key] = [];
+  return r;
+}
+function renderResult() {
+  const r = view.result;
+  const body = $('#resultBody');
+  body.replaceChildren();
+  if (r.warnings.length) {
+    body.append(el('div', { class: 'warnbox' }, el('strong', {}, '확인이 필요한 항목'),
+      el('ul', {}, r.warnings.slice(0, 30).map((w) => el('li', {}, w)))));
+  }
+  body.append(el('div', { class: 'section-head' }, el('h3', {}, '문서 상단')));
+  body.append(el('div', { class: 'grid-h' }, r.meta.header.map((f) =>
+    el('div', {}, el('label', { class: 'field' }, f.label),
+      el('input', { type: 'text', value: cellText(r.header[f.key]), 'aria-label': f.label,
+        onchange: (e) => { r.header[f.key] = parseCell(f.type, e.target.value); } })))));
+
+  r.meta.tables.forEach((t) => {
+    const rows = r.tables[t.key];
+    const again = () => renderResult();
+    body.append(el('div', { class: 'section-head' }, el('h3', {}, t.label + ' (' + rows.length + '행)'),
+      el('button', { class: 'btn small ghost', type: 'button', onclick: () => { rows.push(Object.fromEntries(t.columns.map((c) => [c.key, c.type === 'checkbox' ? [] : null]))); again(); } }, '+ 행 추가')));
+    const thead = el('thead', {}, el('tr', {}, [...t.columns.map((c) => el('th', {}, c.label)), el('th', {}, '')]));
+    const tbody = el('tbody', {}, rows.length
+      ? rows.map((row, ri) => el('tr', {},
+          t.columns.map((c) => el('td', {}, el('input', { type: 'text', class: c.type === 'number' ? 'num' : '', value: cellText(row[c.key]), 'aria-label': c.label,
+            onchange: (e) => { row[c.key] = parseCell(c.type, e.target.value); } }))),
+          el('td', {}, el('button', { class: 'btn small danger', type: 'button', onclick: () => { rows.splice(ri, 1); again(); } }, '삭제'))))
+      : [el('tr', {}, el('td', { colspan: t.columns.length + 1 }, el('span', { class: 'hint' }, '읽은 행이 없습니다. 필요하면 행을 추가해 주세요.')))]);
+    body.append(el('div', { class: 'scroll' }, el('table', {}, thead, tbody)));
+  });
+}
+
+$('#btnConvert').addEventListener('click', async () => {
+  const typed = $('#tplIdInput').value.trim();
+  const id = typed || $('#tplSelect').value;
+  if (!ID_RE.test(id)) return setStatus('status2', 'err', '양식을 선택하거나 올바른 양식 ID를 입력해 주세요.');
+  const f = $('#rptFile').files[0];
+  const bad = checkFile(f);
+  if (bad) return setStatus('status2', 'err', bad);
+  const btn = $('#btnConvert');
+  btn.disabled = true;
+  setStatus('status2', 'busy', 'AI가 일보를 읽고 있습니다. 보통 수십 초 걸립니다.');
+  $('#resultCard').hidden = true;
+  try {
+    const fd = new FormData();
+    fd.append('file', f);
+    fd.append('template_id', id);
+    fd.append('format', 'json');
+    view.result = normalizeResult(await callApi('/convert', fd));
+    renderResult();
+    $('#resultCard').hidden = false;
+    setStatus('status2', 'okk', '읽기가 끝났습니다. 값을 확인하고 필요하면 고친 뒤 내려받으세요.');
+    $('#resultCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  } catch (e) {
+    setStatus('status2', 'err', e.message);
+  } finally { btn.disabled = false; }
+});
+
+/* ============ 내려받기 ============ */
+function download(blob, name) {
+  const a = el('a', { href: URL.createObjectURL(blob), download: name });
+  document.body.append(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+}
+function stamp() { return new Date().toISOString().slice(0, 10).replace(/-/g, ''); }
+function headerAOA(r) { return [['항목', '값'], ...r.meta.header.map((f) => [f.label, cellText(r.header[f.key])])]; }
+function tableAOA(r, t) {
+  return [t.columns.map((c) => c.label),
+    ...r.tables[t.key].map((row) => t.columns.map((c) => { const v = row[c.key]; return Array.isArray(v) ? v.join(', ') : (v === undefined ? null : v); }))];
+}
+function sheetName(label, used) {
+  let base = String(label).replace(/[\[\]:*?\/\\]/g, ' ').trim().slice(0, 28) || '표';
+  let n = base, i = 2;
+  while (used.has(n.toLowerCase())) { n = base.slice(0, 26) + ' ' + i; i += 1; }
+  used.add(n.toLowerCase());
+  return n;
+}
+$('#btnDownload').addEventListener('click', () => {
+  const r = view.result;
+  if (!r) return;
+  const fmt = (document.querySelector('input[name=fmt]:checked') || {}).value || 'xlsx';
+  try {
+    if (fmt === 'json') {
+      const data = { template_id: r.template_id, header: r.header, tables: r.tables };
+      download(new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' }), 'production_report_' + stamp() + '.json');
+    } else {
+      if (typeof XLSX === 'undefined') throw new Error('엑셀 라이브러리를 불러오지 못했습니다. 네트워크를 확인하거나 JSON으로 받아 주세요.');
+      if (fmt === 'xlsx') {
+        const wb = XLSX.utils.book_new();
+        const used = new Set();
+        XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(headerAOA(r)), sheetName('문서 상단', used));
+        r.meta.tables.forEach((t) => XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(tableAOA(r, t)), sheetName(t.label, used)));
+        const buf = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+        download(new Blob([buf], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }), 'production_report_' + stamp() + '.xlsx');
+      } else {
+        const blocks = [[['[문서 상단]'], ...headerAOA(r)]];
+        r.meta.tables.forEach((t) => blocks.push([['[' + t.label + ']'], ...tableAOA(r, t)]));
+        const aoa = blocks.flatMap((b, i) => (i ? [[''], ...b] : b));
+        const csv = XLSX.utils.sheet_to_csv(XLSX.utils.aoa_to_sheet(aoa));
+        download(new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8' }), 'production_report_' + stamp() + '.csv');
+      }
+    }
+    setStatus('status2b', 'okk', '파일을 내려받았습니다.');
+  } catch (e) {
+    setStatus('status2b', 'err', e.message);
+  }
+});
+
+/* ============ 시작 ============ */
+$('#noticeBox').textContent = CONFIG.NOTICE;
+if (window.__DEMO_CFG__) $('#cfgBox').hidden = true;
+$('#cfgPropose').value = endpointOf('/propose'); $('#cfgSave').value = endpointOf('/save'); $('#cfgConvert').value = endpointOf('/convert'); $('#cfgStats').value = endpointOf('/stats');
+$('#cfgHName').value = CFG.hname || ''; $('#cfgHVal').value = CFG.hval || '';
+$('#cfgState').textContent = MOCK ? '- 현재: 목업' : '- 현재: 실제 AI 연결';
+$('#cfgSaveBtn').addEventListener('click', () => {
+  const v = (id) => $(id).value.trim();
+  store.set('demo_cfg', { urls: { '/propose': v('#cfgPropose'), '/save': v('#cfgSave'), '/convert': v('#cfgConvert'), '/stats': v('#cfgStats') }, hname: v('#cfgHName'), hval: v('#cfgHVal') });
+  location.reload();
+});
+if (MOCK) $('#mockBanner').hidden = false;
+refreshTemplateSelect();
+
+</script>
+<script>
+'use strict';
+/* ============ 화면 이동 / 대시보드 동작 ============ */
+(function () {
+  const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+  let toastTimer = null;
+  function toast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg; t.hidden = false;
+    clearTimeout(toastTimer); toastTimer = setTimeout(() => { t.hidden = true; }, 2200);
+  }
+  function go(target) {
+    let view = target, title = '';
+    if (target.startsWith('soon:')) { view = 'soon'; title = target.slice(5); }
+    const sec = document.getElementById('view-' + view) || document.getElementById('view-dashboard');
+    $$('main.content > section').forEach((s) => { s.hidden = s !== sec; });
+    const name = view === 'soon' ? title : sec.dataset.title;
+    document.getElementById('crumb').textContent = name;
+    if (view === 'soon') document.getElementById('soonTitle').textContent = title + ' (준비 중)';
+    $$('#nav button[data-go]').forEach((b) => b.classList.toggle('on', b.dataset.go === target));
+    document.getElementById('grpProd').classList.toggle('open', view === 'prod-report' || document.getElementById('grpProd').classList.contains('open'));
+    document.body.classList.remove('nav-open');
+    window.scrollTo(0, 0);
+    try { history.replaceState(null, '', '#' + encodeURIComponent(target)); } catch (e) { /* iframe 등 */ }
+  }
+  document.addEventListener('click', (e) => {
+    const g = e.target.closest('[data-go]');
+    if (g) { e.preventDefault(); go(g.dataset.go); return; }
+    const t = e.target.closest('[data-toggle]');
+    if (t) { document.getElementById(t.dataset.toggle).classList.toggle('open'); return; }
+    const m = e.target.closest('[data-toast]');
+    if (m) toast(m.dataset.toast);
+    const sw = e.target.closest('.sw');
+    if (sw) { const on = sw.getAttribute('aria-pressed') !== 'true'; sw.setAttribute('aria-pressed', String(on)); sw.textContent = on ? 'ON' : 'OFF'; }
+  });
+  document.getElementById('menuBtn').addEventListener('click', () => document.body.classList.toggle('nav-open'));
+  document.querySelector('.main').addEventListener('click', (e) => { if (!e.target.closest('#menuBtn')) document.body.classList.remove('nav-open'); });
+
+  const d = new Date();
+  document.querySelector('#today span').textContent = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+
+  document.getElementById('chatForm').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const inp = document.getElementById('chatIn'); const v = inp.value.trim();
+    if (!v) return;
+    const log = document.getElementById('chatLog');
+    const me = document.createElement('div'); me.className = 'msg me'; me.textContent = v;
+    const ai = document.createElement('div'); ai.className = 'msg ai'; ai.textContent = 'AI Chat은 아직 준비 중입니다. 생산일보 AI 읽기를 먼저 사용해 보세요.';
+    log.append(me, ai); inp.value = '';
+  });
+
+  /* ---- 대시보드 실제 집계 (/stats 주소가 설정된 경우에만) ---- */
+  const STATS_TTL = 5 * 60 * 1000;
+  let statsBusy = false;
+  const fmt = (n) => Number(n || 0).toLocaleString('ko-KR');
+  function renderStats(d) {
+    const today = Number(d.today) || 0, y = Number(d.yesterday) || 0;
+    const v = document.getElementById('kpiDocs');
+    v.textContent = fmt(today); const u = document.createElement('small'); u.textContent = '건'; v.append(u);
+    const dd = document.getElementById('kpiDocsD'); dd.replaceChildren('전일 대비 ');
+    const sp = document.createElement('span');
+    if (y > 0) { const pct = ((today - y) / y) * 100; sp.className = pct >= 0 ? 'up' : 'down'; sp.textContent = (pct >= 0 ? '▲ ' : '▼ ') + Math.abs(pct).toFixed(1) + '%'; }
+    else { sp.textContent = '비교 데이터 없음'; }
+    dd.append(sp);
+    const head = document.getElementById('recentHead'); head.replaceChildren();
+    const hr = document.createElement('tr'); ['카테고리', '문서명', '처리 시각', '상태'].forEach((h) => { const th = document.createElement('th'); th.textContent = h; hr.append(th); }); head.append(hr);
+    const body = document.getElementById('recentBody'); body.replaceChildren();
+    const rows = Array.isArray(d.recent) ? d.recent.slice(0, 5) : [];
+    if (!rows.length) { const tr = document.createElement('tr'); const td = document.createElement('td'); td.colSpan = 4; td.textContent = '아직 처리한 문서가 없습니다.'; td.style.color = 'var(--muted)'; tr.append(td); body.append(tr); }
+    rows.forEach((r) => {
+      const tr = document.createElement('tr');
+      const t = new Date(r.created_at);
+      const time = isNaN(t) ? '' : String(t.getMonth() + 1).padStart(2, '0') + '-' + String(t.getDate()).padStart(2, '0') + ' ' + String(t.getHours()).padStart(2, '0') + ':' + String(t.getMinutes()).padStart(2, '0');
+      const cat = String(r.category || '생산관리');
+      const COLORS = { '생산관리': '#ef6a6a', '품질관리': '#4fb97a', '물류관리': '#f5b13d' };
+      const c0 = document.createElement('td'); const nmSpan = document.createElement('span'); nmSpan.className = 'nm';
+      const box = document.createElement('i'); box.style.background = COLORS[cat] || '#8b5cf6';
+      nmSpan.append(box, cat); c0.append(nmSpan); tr.append(c0);
+      const docName = String(r.name || r.template_id || '생산일보').slice(0, 28);
+      const dn = document.createElement('td'); dn.textContent = docName;
+      const sub = document.createElement('small'); sub.style.cssText = 'display:block;color:var(--muted);font-size:11.5px';
+      sub.textContent = '읽은 행 ' + fmt(r.rows) + ' · 경고 ' + fmt(r.warnings); dn.append(sub); tr.append(dn);
+      const tdT = document.createElement('td'); tdT.textContent = time; tr.append(tdT);
+      const td = document.createElement('td'); const tag = document.createElement('span');
+      const ok = r.status === 'ok'; tag.className = 'tag ' + (ok ? 'ok' : 'wait'); tag.textContent = ok ? '완료' : '오류'; td.append(tag); tr.append(td); body.append(tr);
+    });
+    document.getElementById('sampleNote').textContent = '문서 처리 건수와 최근 처리 문서는 실제 n8n 기록입니다. 나머지 수치는 예시 데이터입니다. (오늘 ' + fmt(d.ok) + '건 완료 / ' + fmt(d.error) + '건 오류)';
+  }
+  async function loadStats(force) {
+    const url = (typeof endpointOf === 'function') ? endpointOf('/stats') : '';
+    const btn = document.getElementById('statsRefresh');
+    if (!url || statsBusy) return;
+    btn.hidden = false;
+    const cached = store.get('demo_stats', null);
+    if (!force && cached && Date.now() - cached.at < STATS_TTL) { renderStats(cached.data); return; }
+    statsBusy = true; btn.textContent = '불러오는 중...';
+    try {
+      const headers = { 'Content-Type': 'application/json' };
+      if (CFG.hname && CFG.hval) headers[CFG.hname] = CFG.hval;
+      const res = await fetch(url, { method: 'POST', headers, body: '{}' });
+      if (!res.ok) throw new Error(String(res.status));
+      const data = await res.json();
+      store.set('demo_stats', { at: Date.now(), data });
+      renderStats(data);
+    } catch (e) {
+      toast('집계를 불러오지 못해 예시 값을 보여 줍니다.');
+    } finally { statsBusy = false; btn.textContent = '새로고침'; }
+  }
+  document.getElementById('statsRefresh').addEventListener('click', () => loadStats(true));
+
+  let start = 'dashboard';
+  try { const h = decodeURIComponent(location.hash.slice(1)); if (h) start = h; } catch (e) { /* 무시 */ }
+  go(start);
+  loadStats(false);
+})();
+</script>
+</body>
+</html>
