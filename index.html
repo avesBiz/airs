@@ -513,6 +513,10 @@
 <!-- 엑셀 생성용 SheetJS (브라우저에서 파일을 만듭니다) -->
 <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
 <script>
+/* 프록시(Cloudflare Worker) 주소. 예: 'https://airs-proxy.awesn8n.workers.dev' — 비워 두면 설정 화면 방식으로 동작합니다. */
+window.__PROXY_BASE__ = '';
+</script>
+<script>
 'use strict';
 
 /* ============ 설정 ============ */
@@ -521,9 +525,11 @@ const CONFIG = {
   REQUEST_TIMEOUT_MS: 150000,
 };
 window.__DEMO_CFG__ = null;   // n8n에서 페이지를 내보낼 때 이 줄이 실제 설정으로 바뀝니다.
+// 프록시 주소(Cloudflare Worker). 값이 있으면 n8n 주소·키는 페이지에 필요 없고 설정 화면도 숨깁니다.
+const PROXY_BASE = (window.__PROXY_BASE__ || '').replace(/\/+$/, '');
 const store0 = (() => { try { return JSON.parse(localStorage.getItem('demo_cfg') || '{}'); } catch (e) { return {}; } })();
 let CFG = window.__DEMO_CFG__ || store0;
-const endpointOf = (path) => (CFG.urls || {})[path] || '';
+const endpointOf = (path) => PROXY_BASE ? PROXY_BASE + path : ((CFG.urls || {})[path] || '');
 const MOCK = new URLSearchParams(location.search).has('mock') || !['/propose', '/save', '/convert'].some(endpointOf);
 const LIMITS = { imageMB: 5, pdfMB: 10 };
 const TYPES = [['string', '텍스트'], ['number', '숫자'], ['date', '날짜'], ['time', '시간'], ['checkbox', '체크박스']];
@@ -596,7 +602,7 @@ async function callApi(path, body) {
     const url = endpointOf(path);
     if (!url) throw new Error(path + ' 주소가 설정되지 않았습니다. 상단 연결 설정을 확인해 주세요.');
     const headers = isForm ? {} : { 'Content-Type': 'application/json' };
-    if (CFG.hname && CFG.hval) headers[CFG.hname] = CFG.hval;
+    if (!PROXY_BASE && CFG.hname && CFG.hval) headers[CFG.hname] = CFG.hval;
     const res = await fetch(url, {
       method: 'POST',
       body: isForm ? body : JSON.stringify(body),
@@ -1085,7 +1091,7 @@ $('#btnDownload').addEventListener('click', () => {
 
 /* ============ 시작 ============ */
 $('#noticeBox').textContent = CONFIG.NOTICE;
-if (window.__DEMO_CFG__) $('#cfgBox').hidden = true;
+if (window.__DEMO_CFG__ || PROXY_BASE) $('#cfgBox').hidden = true;
 $('#cfgPropose').value = endpointOf('/propose'); $('#cfgSave').value = endpointOf('/save'); $('#cfgConvert').value = endpointOf('/convert'); $('#cfgStats').value = endpointOf('/stats');
 $('#cfgHName').value = CFG.hname || ''; $('#cfgHVal').value = CFG.hval || '';
 $('#cfgState').textContent = MOCK ? '- 현재: 목업' : '- 현재: 실제 AI 연결';
