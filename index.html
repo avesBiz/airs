@@ -225,6 +225,57 @@
     .content { padding: 16px 14px 8px; }
   }
   @media (max-width: 560px) { .kpis { grid-template-columns: minmax(0, 1fr); } .top .crumb span.cur { display: none; } }
+
+  /* ---------- 영업관리 > 반품 송장 AI 읽기 ---------- */
+  .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  .rt-steps { list-style: none; margin: 6px 0 16px; padding: 0; display: flex; flex-wrap: wrap; gap: 10px 26px; }
+  .rt-steps li { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 13.5px; }
+  .rt-steps .n { width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; font-size: 12.5px; font-weight: 700; border: 2px solid #c3cad4; background: #fff; box-sizing: border-box; }
+  .rt-steps li.cur { color: var(--text); font-weight: 600; }
+  .rt-steps li.cur .n { background: var(--primary); border-color: var(--primary); color: #fff; }
+  .rt-steps li.past .n { background: var(--primary-soft); border-color: var(--primary); color: var(--primary); }
+  .rt-drop { width: 100%; min-height: 190px; border: 2px dashed #9aa6b8; background: #fff; border-radius: var(--radius); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; padding: 20px; text-align: center; color: var(--text); }
+  .rt-drop:hover, .rt-drop.over { border-color: var(--primary); background: var(--primary-soft); }
+  .rt-drop svg { width: 40px; height: 40px; color: var(--primary); }
+  .rt-work { display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-start; margin-bottom: 16px; }
+  .rt-work > .card { margin-bottom: 0; }
+  .rt-left { flex: 1 1 320px; min-width: 0; }
+  .rt-right { flex: 1.5 1 420px; min-width: 0; display: grid; gap: 16px; }
+  .rt-right .card { margin-bottom: 0; }
+  .rt-scanwrap { position: relative; overflow: hidden; border-radius: 8px; }
+  .rt-img { display: block; max-width: 100%; max-height: 560px; margin: 0 auto; border: 1px solid var(--line); border-radius: 8px; background: #fff; object-fit: contain; }
+  .rt-scan { position: absolute; left: 0; right: 0; height: 3px; background: var(--primary); box-shadow: 0 0 16px 6px rgba(37,99,235,.35); animation: rtscan 2.4s ease-in-out infinite; }
+  @keyframes rtscan { 0% { top: 0; } 50% { top: calc(100% - 3px); } 100% { top: 0; } }
+  .rt-prog { list-style: none; margin: 0; padding: 0; display: grid; gap: 14px; }
+  .rt-prog li { display: flex; align-items: center; gap: 10px; color: var(--muted); }
+  .rt-prog li.on, .rt-prog li.done { color: var(--text); }
+  .rt-prog li.on { font-weight: 600; }
+  .rt-ic { width: 22px; height: 22px; flex: none; display: grid; place-items: center; }
+  .rt-ic svg { width: 22px; height: 22px; fill: none; stroke: var(--ok); stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+  .rt-ic .ring { width: 18px; height: 18px; border: 2px solid #c3cad4; border-radius: 50%; box-sizing: border-box; }
+  .rt-fields { display: grid; gap: 10px; }
+  .rt-f { border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; display: grid; gap: 6px; }
+  .rt-f.review { border-color: #f0d28a; background: #fffaf0; }
+  .rt-f .hd { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .rt-f label { font-size: 13px; font-weight: 600; color: #3b4556; }
+  .rt-f small { color: var(--muted); font-weight: 400; margin-left: 6px; }
+  .rt-badge { font-size: 12px; font-weight: 600; border-radius: 999px; padding: 2px 10px; white-space: nowrap; }
+  .rt-badge.ok { background: var(--ok-soft); color: #11743a; }
+  .rt-badge.review { background: var(--warn-soft); color: #92400e; }
+  .rt-badge.missing { background: #eef0f4; color: #4b5567; }
+  .rt-badge.edited { background: var(--primary-soft); color: #1d4fc4; }
+  .rt-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .rt-chip { min-height: 40px; padding: 6px 14px; border: 1px solid #c3cad4; background: #fff; border-radius: 999px; font-size: 13.5px; }
+  .rt-chip:hover { border-color: var(--primary); }
+  .rt-chip.on { background: var(--primary); border-color: var(--primary); color: #fff; }
+  .rt-kpis { display: flex; flex-wrap: wrap; gap: 12px; margin: 14px 0; }
+  .rt-kpis > div { flex: 1 1 120px; background: #f4f5f7; border-radius: 10px; padding: 12px 14px; }
+  .rt-kpis .lb { font-size: 12.5px; color: var(--muted); }
+  .rt-kpis .v { font-size: 26px; font-weight: 700; line-height: 1.3; }
+  .rt-mono { font-family: ui-monospace, Menlo, Consolas, monospace; }
+  .rt-okbox { display: flex; align-items: center; gap: 14px; background: var(--ok-soft); border-radius: 10px; padding: 14px 16px; margin-bottom: 14px; }
+  .rt-okbox svg { width: 30px; height: 30px; fill: none; stroke: #11743a; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+  @media (prefers-reduced-motion: reduce) { .rt-scan { animation: none; } }
 </style>
 </head>
 <body>
@@ -273,7 +324,12 @@
           <button data-go="prod-report">생산일보 AI 읽기</button>
         </div>
       </div>
-      <button data-go="soon:영업관리"><svg class="i"><use href="#i-report"/></svg>영업관리<svg class="i chev"><use href="#i-chev"/></svg></button>
+      <div class="grp" id="grpSales">
+        <button data-toggle="grpSales"><svg class="i"><use href="#i-report"/></svg>영업관리<svg class="i chev"><use href="#i-chev"/></svg></button>
+        <div class="sub">
+          <button data-go="return-invoice">반품 송장 AI 읽기</button>
+        </div>
+      </div>
       <button data-go="soon:물류관리"><svg class="i"><use href="#i-truck"/></svg>물류관리<svg class="i chev"><use href="#i-chev"/></svg></button>
       <button data-go="soon:AI Agent"><svg class="i"><use href="#i-bot"/></svg>AI Agent<svg class="i chev"><use href="#i-chev"/></svg></button>
       <button data-go="soon:AI Chat"><svg class="i"><use href="#i-chat"/></svg>AI Chat<svg class="i chev"><use href="#i-chev"/></svg></button>
@@ -308,7 +364,7 @@
           <div><h1>AIRS 제조기업 AI 운영센터</h1><p>기업의 문서와 데이터를 AI로 연결하여 업무를 자동화합니다.</p></div>
           <div class="datebox" id="today"><span></span><svg class="i" style="width:17px;height:17px"><use href="#i-cal"/></svg></div>
         </div>
-        <div class="sample-note" id="sampleNote">이 화면의 수치는 예시 데이터입니다. 실제로 동작하는 기능은 <b>생산관리 &gt; 생산일보 AI 읽기</b>입니다.</div>
+        <div class="sample-note" id="sampleNote">이 화면의 수치는 예시 데이터입니다. 실제로 동작하는 기능은 <b>생산관리 &gt; 생산일보 AI 읽기</b>와 <b>영업관리 &gt; 반품 송장 AI 읽기</b>입니다.</div>
         <div class="dash">
           <div class="col">
             <div class="kpis">
@@ -480,6 +536,62 @@
         </section>
       </section>
 
+      <!-- ========== 영업관리 > 반품 송장 AI 읽기 ========== -->
+      <section id="view-return-invoice" data-title="영업관리 › 반품 송장 AI 읽기" hidden>
+        <div class="page-h"><div><h1>반품 송장 AI 읽기</h1><p>반품 송장을 촬영하거나 스캔해서 올리면, AI가 읽어서 반품 접수 데이터로 만들어 드립니다.</p></div></div>
+        <div id="rtMockBanner" class="banner mock" hidden>목업 모드입니다. 실제 AI를 호출하지 않고 예시 결과로 화면만 확인합니다.</div>
+        <div class="banner notice" id="rtNotice"></div>
+        <ol class="rt-steps" id="rtSteps" aria-label="진행 단계"></ol>
+
+        <!-- 1. 업로드 -->
+        <div class="card" id="rtUpload">
+          <h2>1. 송장 올리기</h2>
+          <button type="button" class="rt-drop" id="rtDrop">
+            <svg class="i" aria-hidden="true"><use href="#i-upload"/></svg>
+            <b style="font-size:17px">송장 이미지를 끌어다 놓거나 클릭해서 선택</b>
+            <span class="hint" style="margin:0">휴대폰 촬영본, 스캔본 모두 가능 (jpg, png, webp)</span>
+          </button>
+          <div class="row" style="margin-top:14px">
+            <button type="button" class="btn" id="rtCamBtn">휴대폰으로 바로 촬영하기</button>
+            <span class="hint" style="margin:0">송장이 없다면 샘플로 체험:</span>
+            <button type="button" class="btn ghost" id="rtSampleA">샘플 ① 손글씨 모델명</button>
+            <button type="button" class="btn ghost" id="rtSampleB">샘플 ② 인쇄된 상품명</button>
+          </div>
+          <input type="file" id="rtFile" accept="image/jpeg,image/png,image/webp" hidden>
+          <input type="file" id="rtCam" accept="image/*" capture="environment" hidden>
+          <p class="hint">용지 전체가 나오게 찍어 주세요. 큰 사진은 자동으로 줄여서 보냅니다. 샘플은 가상의 송장입니다.</p>
+          <div class="status" id="rtStatus" role="status"></div>
+        </div>
+
+        <!-- 2~4. 원본 + AI 결과 -->
+        <div class="rt-work" id="rtWork" hidden>
+          <div class="card rt-left"><h2>원본 송장</h2><div id="rtImgBox"></div><p class="hint" id="rtFileName"></p></div>
+          <div class="rt-right" id="rtPanel"></div>
+        </div>
+
+        <!-- 오늘 반품 현황 -->
+        <div class="card" id="rtListCard">
+          <div class="row" style="justify-content:space-between">
+            <h2 style="margin:0">오늘 반품 현황 <span class="hint" style="font-weight:400">(앞의 3건은 예시 데이터)</span></h2>
+            <div class="row" style="gap:8px">
+              <button type="button" class="btn small plain" id="rtXlsx">엑셀 내보내기</button>
+              <button type="button" class="btn small plain" id="rtCsv">CSV</button>
+              <button type="button" class="btn small plain" id="rtJson">JSON</button>
+            </div>
+          </div>
+          <div class="rt-kpis">
+            <div><div class="lb">오늘 반품 건수</div><div class="v" id="rtTotal">0</div></div>
+            <div><div class="lb">처리 완료</div><div class="v" id="rtDoneN">0</div></div>
+            <div><div class="lb">확인 대기</div><div class="v" id="rtPend">0</div></div>
+          </div>
+          <div class="scroll"><table>
+            <thead><tr><th>시간</th><th>송장번호</th><th>보낸 사람</th><th>전화번호</th><th>모델명</th><th>상태</th></tr></thead>
+            <tbody id="rtBody"></tbody>
+          </table></div>
+          <div class="status" id="rtListStatus" role="status"></div>
+        </div>
+      </section>
+
       <!-- ========== 설정 ========== -->
       <section id="view-settings" data-title="설정" hidden>
         <div class="page-h"><div><h1>설정</h1><p>생산일보 AI 읽기의 연결 주소를 정합니다.</p></div></div>
@@ -491,6 +603,7 @@
             <div><label class="field" for="cfgSave">/save 웹훅 URL</label><input type="text" id="cfgSave" autocomplete="off"></div>
             <div><label class="field" for="cfgConvert">/convert 웹훅 URL</label><input type="text" id="cfgConvert" autocomplete="off"></div>
             <div><label class="field" for="cfgStats">/stats 웹훅 URL (대시보드 집계, 선택)</label><input type="text" id="cfgStats" autocomplete="off"></div>
+            <div><label class="field" for="cfgReturn">/return 웹훅 URL (반품 송장 읽기)</label><input type="text" id="cfgReturn" autocomplete="off"></div>
             <div><label class="field" for="cfgHName">인증 헤더 이름 (없으면 비움)</label><input type="text" id="cfgHName" placeholder="예: X-API-Key" autocomplete="off"></div>
             <div><label class="field" for="cfgHVal">인증 헤더 값</label><input type="text" id="cfgHVal" autocomplete="off"></div>
           </div>
@@ -500,7 +613,7 @@
 
       <!-- ========== 준비 중 ========== -->
       <section id="view-soon" data-title="" hidden>
-        <div class="card soon"><h2 id="soonTitle">준비 중</h2><p>이 메뉴는 아직 준비 중입니다. 지금 사용할 수 있는 기능은 <b>생산관리 &gt; 생산일보 AI 읽기</b>입니다.</p>
+        <div class="card soon"><h2 id="soonTitle">준비 중</h2><p>이 메뉴는 아직 준비 중입니다. 지금 사용할 수 있는 기능은 <b>생산관리 &gt; 생산일보 AI 읽기</b>와 <b>영업관리 &gt; 반품 송장 AI 읽기</b>입니다.</p>
           <div style="margin-top:16px"><button class="btn" data-go="prod-report">생산일보 AI 읽기로 가기</button></div></div>
       </section>
     </main>
@@ -1092,12 +1205,12 @@ $('#btnDownload').addEventListener('click', () => {
 /* ============ 시작 ============ */
 $('#noticeBox').textContent = CONFIG.NOTICE;
 if (window.__DEMO_CFG__ || PROXY_BASE) $('#cfgBox').hidden = true;
-$('#cfgPropose').value = endpointOf('/propose'); $('#cfgSave').value = endpointOf('/save'); $('#cfgConvert').value = endpointOf('/convert'); $('#cfgStats').value = endpointOf('/stats');
+$('#cfgPropose').value = endpointOf('/propose'); $('#cfgSave').value = endpointOf('/save'); $('#cfgConvert').value = endpointOf('/convert'); $('#cfgStats').value = endpointOf('/stats'); $('#cfgReturn').value = endpointOf('/return');
 $('#cfgHName').value = CFG.hname || ''; $('#cfgHVal').value = CFG.hval || '';
 $('#cfgState').textContent = MOCK ? '- 현재: 목업' : '- 현재: 실제 AI 연결';
 $('#cfgSaveBtn').addEventListener('click', () => {
   const v = (id) => $(id).value.trim();
-  store.set('demo_cfg', { urls: { '/propose': v('#cfgPropose'), '/save': v('#cfgSave'), '/convert': v('#cfgConvert'), '/stats': v('#cfgStats') }, hname: v('#cfgHName'), hval: v('#cfgHVal') });
+  store.set('demo_cfg', { urls: { '/propose': v('#cfgPropose'), '/save': v('#cfgSave'), '/convert': v('#cfgConvert'), '/stats': v('#cfgStats'), '/return': v('#cfgReturn') }, hname: v('#cfgHName'), hval: v('#cfgHVal') });
   location.reload();
 });
 if (MOCK) $('#mockBanner').hidden = false;
@@ -1124,7 +1237,8 @@ refreshTemplateSelect();
     document.getElementById('crumb').textContent = name;
     if (view === 'soon') document.getElementById('soonTitle').textContent = title + ' (준비 중)';
     $$('#nav button[data-go]').forEach((b) => b.classList.toggle('on', b.dataset.go === target));
-    document.getElementById('grpProd').classList.toggle('open', view === 'prod-report' || document.getElementById('grpProd').classList.contains('open'));
+    if (view === 'prod-report') document.getElementById('grpProd').classList.add('open');
+    if (view === 'return-invoice') document.getElementById('grpSales').classList.add('open');
     document.body.classList.remove('nav-open');
     window.scrollTo(0, 0);
     try { history.replaceState(null, '', '#' + encodeURIComponent(target)); } catch (e) { /* iframe 등 */ }
@@ -1221,6 +1335,336 @@ refreshTemplateSelect();
   try { const h = decodeURIComponent(location.hash.slice(1)); if (h) start = h; } catch (e) { /* 무시 */ }
   go(start);
   loadStats(false);
+})();
+</script>
+<script>
+'use strict';
+/* ============ 영업관리 > 반품 송장 AI 읽기 ============ */
+/* 호출 경로: 프록시(Cloudflare Worker)의 /return  →  n8n 반품 워크플로우의 Production 웹훅
+   (프록시를 쓰지 않을 때는 설정 화면의 "/return 웹훅 URL"에 n8n 주소를 직접 넣습니다.)
+   주소 뒤에 ?mock 을 붙이면 실제 호출 없이 예시 결과로 화면만 확인할 수 있습니다. */
+(function () {
+  const ENDPOINT = '/return';
+  const NOTICE = '체험판입니다. 실제 고객의 이름·전화번호·주소가 담긴 송장은 올리지 마세요. 이미지는 읽기를 위해 외부 AI 서비스로 전송됩니다.';
+  const USE_MOCK = new URLSearchParams(location.search).has('mock') || (!PROXY_BASE && !endpointOf(ENDPOINT));
+  const TIMEOUT_MS = 90000;
+  const MAX_BYTES = 5 * 1024 * 1024;
+  // 읽는 중 단계 표시는 시간에 따라 넘어가는 연출입니다 (실제 처리 단계와 1:1로 대응하지 않습니다).
+  const STAGES = ['이미지 확인', '택배사 · 송장번호 읽기', '보낸 사람 · 주소 · 전화번호 읽기', '모델명 · 상품명을 모델 리스트와 대조'];
+  const STEP_LABELS = ['업로드', 'AI 읽기', '확인 · 수정', '완료'];
+  const STEP_INDEX = { upload: 0, reading: 1, error: 1, review: 2, done: 3 };
+  const BADGE = { ok: '인식 완료', review: '확인 필요', missing: '미기재', edited: '수정함' };
+  const SEED = [
+    { time: '09:12', tracking: '5012-1180-2265', name: '최*진', phone: '010-****-3307', model: 'AX-210B', sample: true },
+    { time: '10:05', tracking: '5012-6672-0914', name: '정*늘', phone: '010-****-1942', model: 'BX-120', sample: true },
+    { time: '10:48', tracking: '5012-3301-5578', name: '한*윤', phone: '010-****-6025', model: 'CK-75', sample: true },
+  ];
+  const S = { step: 'upload', token: 0, timers: [], stage: 0, imgUrl: null, fileName: '', upFile: null,
+    fields: [], cands: [], pick: '', error: '', rows: SEED.slice(), done: null };
+
+  /* ---------- 작은 도구 ---------- */
+  const maskPhone = (p) => (!p || p.includes('*')) ? (p || '') : p.replace(/\d{4}$/, '****');
+  const maskName = (n) => {
+    if (!n || n.includes('*')) return n || '';
+    const a = Array.from(n);
+    return a.length >= 3 ? a[0] + '*'.repeat(a.length - 2) + a[a.length - 1] : (a.length === 2 ? a[0] + '*' : n);
+  };
+  const clearTimers = () => { S.timers.forEach(clearTimeout); S.timers = []; };
+  const fval = (k) => { const f = S.fields.find((x) => x.key === k); return f && f.value !== null && f.value !== undefined && f.value !== '' ? String(f.value) : ''; };
+
+  function checkImg(f) {
+    if (!f) return '파일을 선택해 주세요.';
+    if (!/^image\//.test(f.type) && !/\.(jpe?g|png|webp|heic)$/i.test(f.name)) return '이미지 파일(jpg, png, webp)만 올릴 수 있습니다.';
+    return '';
+  }
+  // 휴대폰 사진은 용량이 커서 긴 변 2000px 이하 JPEG로 줄여서 보냅니다.
+  function shrink(file) {
+    return new Promise((resolve, reject) => {
+      const url = URL.createObjectURL(file);
+      const img = new Image();
+      img.onload = () => {
+        URL.revokeObjectURL(url);
+        const r = Math.min(1, 2000 / Math.max(img.naturalWidth, img.naturalHeight));
+        const w = Math.max(1, Math.round(img.naturalWidth * r)), h = Math.max(1, Math.round(img.naturalHeight * r));
+        const c = document.createElement('canvas'); c.width = w; c.height = h;
+        const g = c.getContext('2d'); g.fillStyle = '#fff'; g.fillRect(0, 0, w, h); g.drawImage(img, 0, 0, w, h);
+        c.toBlob((b) => (b ? resolve(new File([b], (file.name || 'invoice').replace(/\.[^.]+$/, '') + '.jpg', { type: 'image/jpeg' })) : reject(new Error('이미지를 변환하지 못했습니다.'))), 'image/jpeg', 0.88);
+      };
+      img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('이미지를 열지 못했습니다. HEIC 형식이라면 카메라로 직접 촬영하거나 jpg로 바꿔 올려 주세요.')); };
+      img.src = url;
+    });
+  }
+
+  /* ---------- 체험용 가상 송장 (브라우저에서 그려서 만듭니다) ---------- */
+  function makeSample(kind) {
+    const c = document.createElement('canvas'); c.width = 640; c.height = 800;
+    const g = c.getContext('2d');
+    const F = '"Malgun Gothic","Apple SD Gothic Neo","Noto Sans KR",sans-serif';
+    g.fillStyle = '#fff'; g.fillRect(0, 0, 640, 800);
+    g.strokeStyle = '#14181f'; g.lineWidth = 3; g.strokeRect(14, 14, 612, 772);
+    g.fillStyle = '#14181f'; g.font = 'bold 44px ' + F; g.fillText('한빛택배', 34, 76);
+    g.strokeRect(500, 38, 100, 48); g.font = 'bold 26px ' + F; g.fillText('반품', 526, 73);
+    const tracking = '5012-3847-6620';
+    let x = 40;
+    for (let r = 0; r < 6; r++) for (const d of tracking.replace(/\D/g, '')) { const w = 1 + (Number(d) % 4); if (x + w > 600) break; g.fillRect(x, 110, w, 70); x += w + 2 + (Number(d) % 3); }
+    g.font = 'bold 32px ui-monospace,Menlo,Consolas,monospace'; g.textAlign = 'center'; g.fillText(tracking, 320, 226); g.textAlign = 'left';
+    g.fillStyle = '#5b6472'; g.font = '16px ' + F; g.fillText('보내는 분', 34, 276); g.fillText('연락처', 330, 276); g.fillText('주소', 34, 364);
+    g.fillStyle = '#14181f'; g.font = '28px ' + F; g.fillText('김민수', 34, 314); g.fillText('010-1234-5678', 330, 314);
+    g.font = '24px ' + F; g.fillText('경기도 성남시 분당구 샘플로 123', 34, 400); g.fillText('101동 1203호', 34, 434);
+    g.strokeStyle = '#c3cad4'; g.lineWidth = 2;
+    [470, 570].forEach((y) => { g.beginPath(); g.moveTo(34, y); g.lineTo(606, y); g.stroke(); });
+    g.fillStyle = '#5b6472'; g.font = '16px ' + F; g.fillText('받는 분', 34, 500);
+    g.fillStyle = '#14181f'; g.font = '24px ' + F; g.fillText('반품 접수 센터 (예시)', 34, 536);
+    g.fillStyle = '#5b6472'; g.font = '16px ' + F;
+    if (kind === 'A') {
+      g.fillText('비고 (손글씨)', 34, 606);
+      g.save(); g.translate(44, 690); g.rotate(-0.03); g.fillStyle = '#1e3a8a';
+      g.font = '66px "Nanum Pen Script","Segoe Script","Bradley Hand","Comic Sans MS",cursive'; g.fillText('AX-210B', 0, 0); g.restore();
+    } else {
+      g.fillText('상품명', 34, 606);
+      g.fillStyle = '#14181f'; g.font = '28px ' + F; g.fillText('스마트 에어프라이어 12L 화이트', 34, 664);
+    }
+    g.fillStyle = '#5b6472'; g.font = '14px ' + F; g.fillText('※ 체험용 가상 송장입니다 (실제 고객 정보 아님)', 34, 768);
+    return new Promise((res) => c.toBlob((b) => res(new File([b], 'sample_invoice_' + kind + '.png', { type: 'image/png' })), 'image/png'));
+  }
+
+  /* ---------- 호출 (목업 / 실제) ---------- */
+  function mockResult(file) {
+    const isB = /sample_invoice_B/.test(file.name || '');
+    const f = (key, label, value, confidence, status) => ({ key, label, value, confidence, status });
+    return {
+      ok: true,
+      fields: [
+        f('carrier', '택배사', '한빛택배', 0.95, 'ok'), f('tracking', '송장번호', '5012-3847-6620', 0.97, 'ok'),
+        f('name', '보낸 사람', '김민수', 0.9, 'ok'), f('phone', '전화번호', '010-1234-5678', 0.85, 'ok'),
+        f('addr', '주소', '경기도 성남시 분당구 샘플로 123, 101동 1203호', 0.9, 'ok'),
+        isB ? f('handwritten_model', '모델명(손글씨)', null, 0.9, 'missing') : f('handwritten_model', '모델명(손글씨)', 'AX-2108', 0.55, 'review'),
+        isB ? f('product_name', '상품명', '스마트 에어프라이어 12L 화이트', 0.93, 'ok') : f('product_name', '상품명', null, 0.9, 'missing'),
+      ],
+      candidates: isB
+        ? [{ model: 'T12701GW', product_name: '스마트 에어프라이어 12L 화이트', score: 100, basis: '상품명 기준' },
+           { model: 'T12701GB', product_name: '스마트 에어프라이어 12L 블랙', score: 93, basis: '상품명 기준' },
+           { model: 'T12710GW', product_name: '스마트 에어프라이어 10L 화이트', score: 90, basis: '상품명 기준' }]
+        : [{ model: 'AX-210B', product_name: '공기청정기 소형 블랙', score: 100, basis: '모델명 기준' },
+           { model: 'AX-210W', product_name: '공기청정기 소형 화이트', score: 88, basis: '모델명 기준' },
+           { model: 'AX-310W', product_name: '공기청정기 대형 화이트', score: 75, basis: '모델명 기준' }],
+    };
+  }
+  async function callReturn(file) {
+    if (USE_MOCK) { await sleep(2500); return mockResult(file); }
+    const url = endpointOf(ENDPOINT);
+    if (!url) throw new Error('/return 주소가 설정되지 않았습니다. 설정 화면에서 n8n 웹훅 주소를 확인해 주세요.');
+    const ctl = new AbortController();
+    const timer = setTimeout(() => ctl.abort(), TIMEOUT_MS);
+    try {
+      const fd = new FormData();
+      fd.append('file', file, file.name || 'invoice.jpg');
+      const headers = {};
+      if (!PROXY_BASE && CFG.hname && CFG.hval) headers[CFG.hname] = CFG.hval;
+      const res = await fetch(url, { method: 'POST', body: fd, headers, signal: ctl.signal });
+      let data = null;
+      try { data = await res.json(); } catch (e) { /* JSON이 아닌 응답 */ }
+      if (!res.ok || (data && data.ok === false)) {
+        const hint = res.status === 404 ? ' 프록시(Worker)에 /return 경로가 n8n 웹훅으로 연결되어 있는지 확인해 주세요.' : '';
+        throw new Error(((data && (data.error || data.message)) || '요청에 실패했습니다 (' + res.status + ').') + hint);
+      }
+      if (!data || !Array.isArray(data.fields)) throw new Error('응답 형식이 예상과 달라요. n8n의 마지막 노드 출력(fields, candidates)을 확인해 주세요.');
+      return data;
+    } catch (e) {
+      if (e.name === 'AbortError') throw new Error('시간이 너무 오래 걸려 중단했습니다. 잠시 뒤 다시 시도해 주세요.');
+      if (e instanceof TypeError) throw new Error('서버에 연결하지 못했습니다. 네트워크와 CORS(Allowed Origins) 설정을 확인해 주세요.');
+      throw e;
+    } finally { clearTimeout(timer); }
+  }
+
+  /* ---------- 흐름 ---------- */
+  async function start(file) {
+    const bad = checkImg(file);
+    if (bad) return setStatus('rtStatus', 'err', bad);
+    setStatus('rtStatus', '', '');
+    const token = ++S.token;
+    clearTimers();
+    let up;
+    try { up = await shrink(file); } catch (e) {
+      if (file.size > MAX_BYTES) return setStatus('rtStatus', 'err', e.message);
+      up = file;   // 변환에 실패해도 5MB 이하면 원본을 그대로 보냅니다.
+    }
+    if (token !== S.token) return;
+    if (S.imgUrl) URL.revokeObjectURL(S.imgUrl);
+    S.imgUrl = URL.createObjectURL(up); S.fileName = file.name || '송장 이미지'; S.upFile = up;
+    S.step = 'reading'; S.stage = 0; S.error = '';
+    render();
+    [1500, 3500, 6000].forEach((ms, i) => S.timers.push(setTimeout(() => { if (token === S.token && S.step === 'reading') { S.stage = i + 1; renderPanel(); } }, ms)));
+    try {
+      const data = await callReturn(up);
+      if (token !== S.token) return;
+      clearTimers(); S.stage = STAGES.length; renderPanel();
+      await sleep(500);
+      if (token !== S.token) return;
+      S.fields = data.fields.map((x) => ({ key: String(x.key || '').replace(/[^a-z0-9_]/gi, ''), label: String(x.label || x.key || '항목'),
+        value: x.value === undefined ? null : x.value, confidence: typeof x.confidence === 'number' ? x.confidence : null,
+        status: ['ok', 'review', 'missing'].includes(x.status) ? x.status : 'ok', edited: false }));
+      S.cands = (Array.isArray(data.candidates) ? data.candidates : []).slice(0, 3).filter((c) => c && c.model);
+      S.pick = S.cands.length ? String(S.cands[0].model) : (fval('handwritten_model') || '');
+      S.step = 'review'; render();
+    } catch (e) {
+      if (token !== S.token) return;
+      clearTimers(); S.step = 'error'; S.error = e.message; render();
+    }
+  }
+  function reset() {
+    S.token += 1; clearTimers();
+    if (S.imgUrl) { URL.revokeObjectURL(S.imgUrl); S.imgUrl = null; }
+    S.step = 'upload'; S.upFile = null; S.fields = []; S.cands = []; S.pick = ''; S.error = ''; S.done = null;
+    setStatus('rtStatus', '', '');
+    render();
+  }
+  function confirmReturn() {
+    const tracking = fval('tracking');
+    if (!tracking) return setStatus('rtReviewStatus', 'err', '송장번호를 입력해 주세요.');
+    const d = new Date();
+    const row = { time: String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0'), tracking,
+      name: maskName(fval('name')), phone: maskPhone(fval('phone')), model: S.pick || fval('handwritten_model') || fval('product_name') || '-' };
+    S.rows.unshift(row); S.done = row; S.step = 'done'; render();
+  }
+
+  /* ---------- 그리기 ---------- */
+  function renderSteps() {
+    const idx = STEP_INDEX[S.step];
+    $('#rtSteps').replaceChildren(...STEP_LABELS.map((t, i) =>
+      el('li', { class: i === idx ? 'cur' : (i < idx ? 'past' : ''), 'aria-current': i === idx ? 'step' : false }, el('span', { class: 'n', text: String(i + 1) }), t)));
+  }
+  function renderImage() {
+    $('#rtImgBox').replaceChildren(el('div', { class: 'rt-scanwrap' },
+      el('img', { class: 'rt-img', src: S.imgUrl, alt: '업로드한 송장 이미지' }),
+      S.step === 'reading' ? el('div', { class: 'rt-scan' }) : null));
+    $('#rtFileName').textContent = S.fileName;
+  }
+  function progressPanel() {
+    const check = () => { const s = document.createElementNS('http://www.w3.org/2000/svg', 'svg'); s.setAttribute('viewBox', '0 0 24 24'); s.setAttribute('aria-hidden', 'true');
+      s.innerHTML = '<circle cx="12" cy="12" r="10"/><path d="M7.5 12.5l3 3 6-6.5"/>'; return s; };
+    return el('div', { class: 'card' }, el('h2', { text: 'AI가 송장을 읽고 있어요' }),
+      el('ul', { class: 'rt-prog' }, STAGES.map((t, i) => {
+        const done = S.stage > i, on = S.stage === i;
+        return el('li', { class: done ? 'done' : (on ? 'on' : '') },
+          el('span', { class: 'rt-ic' }, done ? check() : (on ? el('span', { class: 'spinner', style: 'margin:0' }) : el('span', { class: 'ring' }))), t);
+      })));
+  }
+  function errorPanel() {
+    return el('div', { class: 'card' }, el('h2', { text: '읽지 못했어요' }),
+      el('div', { class: 'status show err', style: 'margin:0 0 12px', text: S.error }),
+      el('div', { class: 'row' },
+        el('button', { class: 'btn', type: 'button', onclick: () => (S.upFile ? start(S.upFile) : reset()) }, '다시 시도'),
+        el('button', { class: 'btn plain', type: 'button', onclick: reset }, '처음부터')));
+  }
+  function fieldRow(f) {
+    const id = 'rtf_' + f.key, row = el('div', { class: 'rt-f' }), badge = el('span', { class: 'rt-badge' });
+    const paint = () => { const st = f.edited ? 'edited' : f.status; badge.className = 'rt-badge ' + st; badge.textContent = BADGE[st] || '';
+      row.className = 'rt-f' + (st === 'review' ? ' review' : ''); };
+    const conf = f.confidence !== null && f.value !== null ? '확신도 ' + Math.round(f.confidence * 100) + '%' : '';
+    row.append(
+      el('div', { class: 'hd' }, el('label', { for: id }, f.label, conf ? el('small', { text: conf }) : null), badge),
+      el('input', { type: 'text', id, value: f.value === null ? '' : String(f.value), maxlength: 200,
+        placeholder: f.status === 'missing' ? '송장에서 읽지 못함 — 필요하면 직접 입력' : '',
+        onchange: (e) => { const v = e.target.value.trim(); f.value = v === '' ? null : v; f.edited = true; paint(); } }));
+    paint();
+    return row;
+  }
+  function modelBlock() {
+    const box = el('div', { class: 'rt-f', style: 'border-color:#b7cdf7;background:#f5f8ff' });
+    const chips = el('div', { class: 'rt-chips', role: 'group', 'aria-label': '모델 후보' });
+    const detail = el('p', { class: 'hint', style: 'margin:0' });
+    const input = el('input', { type: 'text', id: 'rtModel', value: S.pick, maxlength: 80, placeholder: '후보를 고르거나 직접 입력',
+      onchange: (e) => { S.pick = e.target.value.trim(); paint(); } });
+    const paint = () => {
+      chips.querySelectorAll('button').forEach((b) => { const on = b.dataset.model === S.pick; b.classList.toggle('on', on); b.setAttribute('aria-pressed', String(on)); });
+      const c = S.cands.find((x) => x.model === S.pick);
+      detail.textContent = c ? (c.product_name || '') + (c.basis ? ' · ' + c.basis : '') : '';
+    };
+    S.cands.forEach((c) => chips.append(el('button', { type: 'button', class: 'rt-chip', 'data-model': c.model, 'aria-pressed': 'false',
+      onclick: () => { S.pick = c.model; input.value = c.model; paint(); } }, c.model + ' · ' + c.score + '%')));
+    box.append(el('div', { class: 'hd' }, el('label', { for: 'rtModel', text: '반품 모델 확정' }), el('span', { class: 'hint', style: 'margin:0', text: '모델 리스트에서 찾은 후보 (일치율)' })),
+      S.cands.length ? chips : el('p', { class: 'hint', style: 'margin:0', text: '비교할 후보가 없어요. 모델명이나 상품명을 읽지 못했거나 리스트에 없습니다. 직접 입력해 주세요.' }),
+      input, detail);
+    paint();
+    return box;
+  }
+  function reviewPanel() {
+    const need = S.fields.filter((f) => f.status === 'review').length;
+    return el('div', { class: 'card' },
+      el('div', { class: 'row', style: 'justify-content:space-between;margin-bottom:6px' },
+        el('h2', { style: 'margin:0', text: '인식 결과를 확인해 주세요' }),
+        el('span', { class: 'rt-badge ' + (need ? 'review' : 'ok'), text: need ? '확인 필요 ' + need + '건' : '모두 인식 완료' })),
+      el('p', { class: 'hint', style: 'margin:0 0 12px', text: '노란색 항목은 확신도가 낮아요. 원본과 비교해서 고쳐 주세요. 송장에 가려져 인쇄된 값(*)은 그대로 둡니다.' }),
+      el('div', { class: 'rt-fields' }, S.fields.map(fieldRow), modelBlock()),
+      el('div', { class: 'row', style: 'margin-top:16px' },
+        el('button', { class: 'btn', type: 'button', onclick: confirmReturn }, '반품 완료 처리'),
+        el('button', { class: 'btn plain', type: 'button', onclick: reset }, '다시 올리기')),
+      el('div', { class: 'status', id: 'rtReviewStatus', role: 'status' }));
+  }
+  function donePanel() {
+    const r = S.done, ok = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    ok.setAttribute('viewBox', '0 0 24 24'); ok.setAttribute('aria-hidden', 'true'); ok.innerHTML = '<circle cx="12" cy="12" r="10"/><path d="M7.5 12.5l3 3 6-6.5"/>';
+    return el('div', { class: 'card' },
+      el('div', { class: 'rt-okbox' }, ok, el('div', {}, el('strong', { text: '반품 완료 처리되었습니다' }), el('div', { class: 'rt-mono', text: [r.tracking, r.name, r.model].filter(Boolean).join(' · ') }))),
+      el('p', { class: 'hint', style: 'margin:0 0 12px', text: '아래 오늘 반품 현황에 방금 처리한 건이 추가되었습니다. 쌓인 데이터는 엑셀, CSV, JSON으로 내려받을 수 있습니다. (이 목록은 화면을 새로고침하면 사라집니다.)' }),
+      el('div', { class: 'row' }, el('button', { class: 'btn', type: 'button', onclick: reset }, '다음 송장 처리하기')));
+  }
+  function renderPanel() {
+    const p = { reading: progressPanel, error: errorPanel, review: reviewPanel, done: donePanel }[S.step];
+    $('#rtPanel').replaceChildren(p ? p() : '');
+  }
+  function renderList() {
+    $('#rtTotal').textContent = S.rows.length; $('#rtDoneN').textContent = S.rows.length;
+    $('#rtPend').textContent = (S.step === 'reading' || S.step === 'review') ? 1 : 0;
+    $('#rtBody').replaceChildren(...S.rows.map((r) => el('tr', {},
+      el('td', { text: r.time }), el('td', { class: 'rt-mono', text: r.tracking }), el('td', { text: r.name }), el('td', { text: r.phone }), el('td', { text: r.model }),
+      el('td', {}, el('span', { class: 'rt-badge ' + (r.sample ? 'missing' : 'ok'), text: r.sample ? '예시' : '완료' })))));
+  }
+  function render() {
+    $('#rtUpload').hidden = S.step !== 'upload';
+    $('#rtWork').hidden = S.step === 'upload';
+    renderSteps();
+    if (S.step !== 'upload') { renderImage(); renderPanel(); }
+    renderList();
+  }
+
+  /* ---------- 내보내기 ---------- */
+  const COLS = [['time', '시간'], ['tracking', '송장번호'], ['name', '보낸 사람'], ['phone', '전화번호'], ['model', '모델명']];
+  const csvCell = (v) => { let s = String(v === null || v === undefined ? '' : v); if (/^[=+\-@]/.test(s)) s = "'" + s; return '"' + s.replace(/"/g, '""') + '"'; };
+  function exportRows(kind) {
+    try {
+      const rows = S.rows;
+      if (kind === 'json') download(new Blob([JSON.stringify(rows.map(({ sample, ...r }) => r), null, 2)], { type: 'application/json' }), 'returns_' + stamp() + '.json');
+      else if (kind === 'csv') {
+        const lines = [COLS.map((c) => csvCell(c[1])).join(','), ...rows.map((r) => COLS.map((c) => csvCell(r[c[0]])).join(','))];
+        download(new Blob(['\ufeff' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8' }), 'returns_' + stamp() + '.csv');
+      } else {
+        if (typeof XLSX === 'undefined') throw new Error('엑셀 라이브러리를 불러오지 못했습니다. CSV나 JSON으로 받아 주세요.');
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([COLS.map((c) => c[1]), ...rows.map((r) => COLS.map((c) => r[c[0]]))]), '반품');
+        download(new Blob([XLSX.write(wb, { bookType: 'xlsx', type: 'array' })], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }), 'returns_' + stamp() + '.xlsx');
+      }
+      setStatus('rtListStatus', 'okk', '파일을 내려받았습니다.');
+    } catch (e) { setStatus('rtListStatus', 'err', e.message); }
+  }
+
+  /* ---------- 연결 ---------- */
+  $('#rtNotice').textContent = NOTICE;
+  if (USE_MOCK) $('#rtMockBanner').hidden = false;
+  const drop = $('#rtDrop'), fileIn = $('#rtFile'), camIn = $('#rtCam');
+  drop.addEventListener('click', () => fileIn.click());
+  ['dragenter', 'dragover'].forEach((ev) => drop.addEventListener(ev, (e) => { e.preventDefault(); drop.classList.add('over'); }));
+  ['dragleave', 'drop'].forEach((ev) => drop.addEventListener(ev, (e) => { e.preventDefault(); drop.classList.remove('over'); }));
+  drop.addEventListener('drop', (e) => { const f = e.dataTransfer && e.dataTransfer.files[0]; if (f) start(f); });
+  [fileIn, camIn].forEach((inp) => inp.addEventListener('change', () => { const f = inp.files[0]; inp.value = ''; if (f) start(f); }));
+  $('#rtCamBtn').addEventListener('click', () => camIn.click());
+  $('#rtSampleA').addEventListener('click', async () => start(await makeSample('A')));
+  $('#rtSampleB').addEventListener('click', async () => start(await makeSample('B')));
+  $('#rtXlsx').addEventListener('click', () => exportRows('xlsx'));
+  $('#rtCsv').addEventListener('click', () => exportRows('csv'));
+  $('#rtJson').addEventListener('click', () => exportRows('json'));
+  render();
 })();
 </script>
 </body>
