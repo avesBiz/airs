@@ -1389,6 +1389,8 @@ refreshTemplateSelect();
   const MAX_BYTES = 5 * 1024 * 1024;
   const MAX_REF_ROWS = 3000;
   const MAX_CUSTOM = 5;
+  const WARN_LOW = 60;   // 최고 일치율이 이 값 미만이면 "리스트에 없을 수 있어요" 안내
+  const WARN_MID = 80;   // 이 값 미만이면 "비슷한 후보예요" 안내
   const DEFAULT_FIELDS = [
     { key: 'carrier', label: '택배사' }, { key: 'tracking', label: '송장번호' }, { key: 'name', label: '보낸 사람' },
     { key: 'phone', label: '전화번호' }, { key: 'addr', label: '주소' },
@@ -1761,9 +1763,14 @@ refreshTemplateSelect();
       const c = S.cands.find((x) => x.model === S.pick);
       detail.textContent = c ? (c.product_name || '') + (c.basis ? ' · ' + c.basis : '') : '';
     };
+    const top = S.cands.length ? Math.max(...S.cands.map((c) => Number(c.score) || 0)) : null;
+    const warnText = top === null ? '' : (top < WARN_LOW ? '일치하는 모델이 리스트에 없을 수 있어요. 모델명을 직접 확인해 주세요.'
+      : (top < WARN_MID ? '비슷한 후보예요. 원본과 비교해서 확인해 주세요.' : ''));
+    const warn = warnText ? el('div', { class: 'status show', role: 'note', style: 'margin:0;background:var(--warn-soft);border:1px solid #f0d28a;color:#92400e', text: warnText }) : null;
     S.cands.forEach((c) => chips.append(el('button', { type: 'button', class: 'rt-chip', 'data-model': c.model, 'aria-pressed': 'false',
       onclick: () => { S.pick = c.model; input.value = c.model; paint(); } }, c.model + ' · ' + c.score + '%')));
     box.append(el('div', { class: 'hd' }, el('label', { for: 'rtModel', text: '반품 모델 확정' }), el('span', { class: 'hint', style: 'margin:0', text: '참고 리스트에서 찾은 후보 (일치율)' })),
+      warn,
       S.cands.length ? chips : el('p', { class: 'hint', style: 'margin:0', text: '비교할 후보가 없어요. 모델명이나 상품명을 읽지 못했거나 리스트에 없습니다. 직접 입력해 주세요.' }),
       input, detail);
     paint();
