@@ -609,18 +609,18 @@
         <!-- 오늘 반품 현황 -->
         <div class="card" id="rtListCard">
           <div class="row" style="justify-content:space-between">
-            <h2 style="margin:0">오늘 반품 현황 <span class="hint" style="font-weight:400">(앞의 3건은 예시 데이터)</span></h2>
+            <h2 style="margin:0">반품 처리 현황 <span class="hint" style="font-weight:400">(앞의 3건은 예시 데이터)</span></h2>
             <div class="row" style="gap:8px">
               <button type="button" class="btn small plain" id="rtXlsx">엑셀 내보내기</button>
               <button type="button" class="btn small plain" id="rtCsv">CSV</button>
               <button type="button" class="btn small plain" id="rtJson">JSON</button>
             </div>
           </div>
-          <div class="rt-kpis">
-            <div><div class="lb">오늘 반품 건수</div><div class="v" id="rtTotal">0</div></div>
-            <div><div class="lb">처리 완료</div><div class="v" id="rtDoneN">0</div></div>
-            <div><div class="lb">확인 대기</div><div class="v" id="rtPend">0</div></div>
+          <div class="rt-kpis" style="margin-bottom:6px">
+            <div><div class="lb">AI가 읽은 건</div><div class="v" id="rtReads">0</div></div>
+            <div><div class="lb">반품 완료 처리</div><div class="v" id="rtDoneN">0</div></div>
           </div>
+          <p class="hint" style="margin:0 0 12px">이 브라우저에서 처리한 건 기준이에요. 두 숫자의 차이는 읽었지만 완료 처리하지 않은 건이에요.</p>
           <div class="scroll"><table>
             <thead><tr><th>시간</th><th>송장번호</th><th>보낸 사람</th><th>전화번호</th><th>모델명</th><th>추가 항목</th><th>상태</th></tr></thead>
             <tbody id="rtBody"></tbody>
@@ -1407,7 +1407,7 @@ refreshTemplateSelect();
     { time: '10:48', tracking: '5012-3301-5578', name: '한*윤', phone: '010-****-6025', model: 'CK-75', extra: '', sample: true },
   ];
   const S = { step: 'upload', token: 0, timers: [], stage: 0, imgUrl: null, fileName: '', upFile: null, opts: null,
-    selKeys: new Set(), fields: [], cands: [], pick: '', error: '', rows: SEED.slice(), done: null };
+    selKeys: new Set(), fields: [], cands: [], pick: '', error: '', rows: SEED.slice(), reads: SEED.length, done: null };
   const SEL = { checked: new Set(DEFAULT_FIELDS.map((f) => f.key)), customs: [] };
   let customSeq = 0;
   let REF = null;   // { name, sheets:[{name, aoa}], sheet, modelCol, nameCol }
@@ -1687,6 +1687,7 @@ refreshTemplateSelect();
         status: ['ok', 'review', 'missing'].includes(x.status) ? x.status : 'ok', edited: false }));
       S.cands = (Array.isArray(data.candidates) ? data.candidates : []).slice(0, 3).filter((c) => c && c.model);
       S.pick = S.cands.length ? String(S.cands[0].model) : (fval('handwritten_model') || '');
+      S.reads += 1;   // 읽기에 성공한 건수 (대시보드 집계와 같은 기준)
       S.step = 'review'; render();
     } catch (e) {
       if (token !== S.token) return;
@@ -1803,8 +1804,7 @@ refreshTemplateSelect();
     $('#rtPanel').replaceChildren(p ? p() : '');
   }
   function renderList() {
-    $('#rtTotal').textContent = S.rows.length; $('#rtDoneN').textContent = S.rows.length;
-    $('#rtPend').textContent = (S.step === 'reading' || S.step === 'review') ? 1 : 0;
+    $('#rtReads').textContent = S.reads; $('#rtDoneN').textContent = S.rows.length;
     $('#rtBody').replaceChildren(...S.rows.map((r) => el('tr', {},
       el('td', { text: r.time }), el('td', { class: 'rt-mono', text: r.tracking }), el('td', { text: r.name }), el('td', { text: r.phone }), el('td', { text: r.model }), el('td', { text: r.extra || '' }),
       el('td', {}, el('span', { class: 'rt-badge ' + (r.sample ? 'missing' : 'ok'), text: r.sample ? '예시' : '완료' })))));
